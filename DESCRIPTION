@@ -1,0 +1,17 @@
+Package: dirtyr
+Type: Package
+Title: dirtyr: Dealing with dirty data in R
+Version: 0.1.0
+Author: person(given  = "Jordan Mark",
+               family = "Barbone",
+               email  = "jmbarbone@gmail.com",
+               role   = c("aut", "cre"))
+Maintainer: Jordan Mark Barbone <jmbarbone@gmail.com>
+Description: A package for dealing wiht dirty data.
+    Data with missing values, that isn't formatted appropriately, etc.
+License: What license is it under?
+Encoding: UTF-8
+LazyData: true
+Imports: Rcpp (>= 1.0.3)
+LinkingTo: Rcpp
+RoxygenNote: 7.0.2
