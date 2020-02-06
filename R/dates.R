@@ -11,7 +11,6 @@
 #' @examples
 #' earliest_date(2019, 1, 0)
 
-
 earliest_date <- function(year, month = NULL, day = NULL) {
   if(is.na(year)) return(NA)
 
@@ -25,10 +24,10 @@ earliest_date <- function(year, month = NULL, day = NULL) {
   as.Date(paste(c(year, unlist(x)), collapse = "-"))
 }
 
-earliest_date(2000)
-earliest_date(2019, NULL, NULL)
-earliest_date(2019, NULL, 2)
-earliest_date(2019, NULL, 31)
+# earliest_date(2000)
+# earliest_date(2019, NULL, NULL)
+# earliest_date(2019, NULL, 2)
+# earliest_date(2019, NULL, 31)
 
 latest_date <- function(year, month = NULL, day = NULL) {
   if(is.na(year)) return(NA)
@@ -41,12 +40,12 @@ latest_date <- function(year, month = NULL, day = NULL) {
   as.Date(paste(year, month, day, sep = "-"))
 }
 
-latest_date(2019)
-latest_date(2019, NULL, NULL)
-latest_date(2019, 0)
-latest_date(2019, NULL, 2)
-latest_date(2019, 2)
-latest_date(2016, 2)
+# latest_date(2019)
+# latest_date(2019, NULL, NULL)
+# latest_date(2019, 0)
+# latest_date(2019, NULL, 2)
+# latest_date(2019, 2)
+# latest_date(2016, 2)
 
 unknown_date <- function(x, format = "ymd", possible = c("earliest", "latest")) {
   possible <- match.arg(possible)
@@ -59,12 +58,10 @@ unknown_date <- function(x, format = "ymd", possible = c("earliest", "latest")) 
          latest = latest_date(year = x[1], month = x[2], day = x[3]))
 }
 
-
-x <- "UN UNK 2019"
-unknown_date(x)
-unknown_date(x, format = "dmy")
-unknown_date(x, format = "dmy", possible = "l")
-
+# x <- "UN UNK 2019"
+# unknown_date(x)
+# unknown_date(x, format = "dmy")
+# unknown_date(x, format = "dmy", possible = "l")
 
 days_in_month <- c(31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31)
 names(days_in_month) <- month.abb

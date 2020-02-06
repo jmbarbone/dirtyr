@@ -23,3 +23,20 @@ count_na <- function(x) {
 count_na_vars <- function(df) {
   vapply(df, count_na, integer(1), USE.NAMES = TRUE)
 }
+
+#' @export
+#' @rdname nas
+is_nin <- function(x) {
+  vapply(x, any_nin, logical(1), USE.NAMES = T)
+}
+
+#' @export
+#' @rdname nas
+any_nin <- function(x) {
+  is.null(x) | is.na(x) | is.infinite(x)
+}
+
+# is_nin(x)
+# which_nin(x)
+# any_nin(x)
+# anyNA(x)

@@ -4,6 +4,7 @@
 #'
 #' @param x a vector of values
 #'
+#' @name which_na
 #' @export
 
 which_na <- function(x) {
@@ -30,4 +31,10 @@ which_min_na <- function(x) {
 #' @rdname which_na
 which_min_na <- function(x) {
   which.min(is_na_inf(x))
+}
+
+#' @export
+#' @rdname which_na
+which_nin <- function(x) {
+  which(drop_names(is_nin(x)), useNames = FALSE)
 }

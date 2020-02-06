@@ -24,3 +24,8 @@ make_dirtyr <- function(n = 1e7) {
 
 # saveRDS(make_dirtyr(), "data/dirty.rds")
 # saveRDS(make_dirtyr(100), "data/dirty_small.rds")
+
+remove_names <- function(x) {
+  names(x) <- NULL
+  x
+}
