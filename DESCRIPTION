@@ -1,0 +1,19 @@
+Package: dirtyr
+Title: Deals with dirty data
+Version: 0.0.0.9000
+Authors@R: 
+    person(given = "Jordan Mark",
+           family = "Barbone",
+           role = c("aut", "cre"),
+           email = "jmbarbone@gmail.com",
+           comment = c(ORCID = "YOUR-ORCID-ID"))
+Description: Functions and wrappers for dealing with
+    and exploring "dirty"" data.
+License: MIT + file LICENSE
+Encoding: UTF-8
+LazyData: true
+Depends:
+    magrittr
+Suggests: 
+    testthat
+RoxygenNote: 7.0.2
