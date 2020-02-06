@@ -74,3 +74,37 @@ df2 <- data.frame(i = c(1, 2, 3, 4),
                   stringsAsFactors = FALSE)
 
 data_frame_qc(df1, df2) %>% as_tibble
+
+
+# Notes -------------------------------------------------------------------
+
+qc <- function(x, y, ...) {
+  UseMethod("qc", ...)
+}
+
+qc.default <- function(x, y) {
+  stop("No applicable method.", call. = FALSE)
+}
+
+qc.factor <- function(x, y) {
+  # computer factor level differences if ordered?
+}
+
+qc.character <- function(x, y) {
+
+}
+
+qc.numeric <- function(x, y) {
+  # compute differences?
+  # "flag" for certain differences?
+}
+
+qc.data.frame <- function(x, y, ...) {
+  # add column for differences
+}
+
+qc.matrix <- function(x, y, ...) {
+  switch(typeof(x),
+         numeric = {},
+         character = {})
+}
