@@ -29,3 +29,10 @@ remove_names <- function(x) {
   names(x) <- NULL
   x
 }
+
+insert <- function(x, y, p) {
+  pos <- seq_along(x)
+  c(x[pos < p], y, x[pos >= p])
+}
+
+# insert(letters[1:4], "xx", 4)
