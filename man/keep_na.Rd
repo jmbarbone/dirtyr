@@ -5,9 +5,9 @@
 \alias{keep_nin}
 \title{Filter for missing data}
 \usage{
-keep_na(df, ...)
+keep_na(df, cols = NULL)
 
-keep_nin(df, ...)
+keep_nin(df, cols)
 }
 \arguments{
 \item{df}{A data.frame.}

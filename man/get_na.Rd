@@ -5,14 +5,16 @@
 \alias{get_na_inf}
 \title{Get NA values}
 \usage{
-get_na(.data, ...)
+get_na(.data, vars, ...)
 
 get_na_inf(.data, ...)
 }
 \arguments{
 \item{.data}{A data.frame.}
 
-\item{col_names}{Column names of the data set to check on}
+\item{vars}{Column names of the data set to check on}
+
+\item{...}{Additional arguments passed to methods}
 }
 \description{
 Return NA values from a data set.

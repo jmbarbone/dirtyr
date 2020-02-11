@@ -16,8 +16,6 @@
 #' @param format A date "format" (see details)
 #' @param possible Whether to look at earliest or latest
 #'
-#' @importFrom dplyr case_when
-#'
 #' @name possible_date
 #' @export
 #' @examples
@@ -75,14 +73,14 @@ latest_date <- function(year, month = NULL, day = NULL) {
 #' @rdname possible_date
 unknown_date <- function(x, format = "ymd", possible = c("earliest", "latest")) {
   possible <- match.arg(possible)
-  res <- lapply(x, extract_date, possible, format)
+  res <- lapply(x, extract_date, format, possible)
   do.call("c", res)
 }
 
-extract_date <- function(x, possible, format) {
+extract_date <- function(x, format, possible) {
   if(is.na(x)) return(NA_date_)
   x <- unlist(strsplit(x, "[^[:alnum:]]"))
-  x[grepl("UNK?|NA", x, ignore.case = TRUE)] <- 0
+  x[grepl("^UNK?|NA$", x, ignore.case = TRUE)] <- 0
   form <- c("y" = 1, "m" = 2, "d" = 3)[unlist(strsplit(format, ""))]
 
   v <- switch(length(x),

@@ -8,15 +8,17 @@
 #' @export
 #' @name keep_na
 
-keep_na <- function(df, ...)
+keep_na <- function(df, cols = NULL)
 {
-  subset(df, apply(df, 1, anyNa))
+  cols <- if_then(df, is.null, colnames(df))
+  subset(df[cols], apply(df[cols], 1, anyNA))
 }
 
 #' @export
 #' @rdname keep_na
-keep_nin <- function(df, ...) {
-  subset(df, apply(df, 1, anyNin))
+keep_nin <- function(df, cols) {
+  cols <- if_then(df, is.null, colnames(df))
+  subset(df[cols], apply(df[cols], 1, any_nin))
 }
 
 # df <- dplyr::sample_n(airquality, 10000, T)

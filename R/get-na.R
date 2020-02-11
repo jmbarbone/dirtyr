@@ -3,11 +3,14 @@
 #' Return NA values from a data set.
 #'
 #' @param .data A data.frame.
-#' @param col_names Column names of the data set to check on
+#' @param vars Column names of the data set to check on
+#' @param ... Additional arguments passed to methods
+#'
+#' @importFrom stats complete.cases
 #'
 #' @export
 
-get_na <- function(.data, ...) {
+get_na <- function(.data, vars, ...) {
   UseMethod("get_na", .data)
 }
 

@@ -36,5 +36,5 @@ which_min_na <- function(x) {
 #' @export
 #' @rdname which_na
 which_nin <- function(x) {
-  which(drop_names(is_nin(x)), useNames = FALSE)
+  which(remove_names(is_nin(x)), useNames = FALSE)
 }
