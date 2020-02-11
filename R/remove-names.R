@@ -21,16 +21,19 @@ remove_names <- function(object) {
   UseMethod("remove_names", object)
 }
 
+#' @export
 remove_names.default <- function(object) {
   names(object) <- NULL
   object
 }
 
+#' @export
 remove_names.matrix <- function(object) {
   dimnames(object) <- NULL
   object
 }
 
+#' @export
 remove_names.data.frame <- function(object) {
   rownames(object) <- NULL
   names(object) <- NULL

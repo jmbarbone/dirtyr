@@ -4,7 +4,6 @@
 \alias{nas}
 \alias{is_na_inf}
 \alias{count_na}
-\alias{count_na_vars}
 \alias{is_nin}
 \alias{any_nin}
 \title{Additional na functions}
@@ -13,14 +12,12 @@ is_na_inf(x)
 
 count_na(x)
 
-count_na_vars(df)
-
 is_nin(x)
 
 any_nin(x)
 }
 \arguments{
-\item{x}{a vector of values}
+\item{x}{a vector or data.frame of values}
 }
 \description{
 Additional functions to sort for NA values
