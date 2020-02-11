@@ -33,3 +33,10 @@ remove_names <- function(x) {
 is_named <- function(x) {
   !is.null(names(x))
 }
+
+insert <- function(x, y, p) {
+  pos <- seq_along(x)
+  c(x[pos < p], y, x[pos >= p])
+}
+
+# insert(letters[1:4], "xx", 4)
