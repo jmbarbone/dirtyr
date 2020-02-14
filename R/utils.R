@@ -39,3 +39,56 @@ insert <- function(x, y, p) {
 suppress_wm <- function(x) {
   suppressWarnings(suppressMessages(x))
 }
+
+#' @importFrom dplyr anti_join
+#' @importFrom purrr safely
+
+safe_anti_join <- safely(anti_join)
+
+short_class <- function(x) {
+  cl <- class(x)
+  if("ordered" %in% cl) {
+    "ordered"
+  } else if(cl == "integer") {
+    "numeric"
+  } else if("factor" %in% cl) {
+    "text"
+  } else {
+    cl
+  }
+}
+
+which_level <- function(f) {
+  sapply(f, function(f) which(f == levels(f)), USE.NAMES = FALSE)
+}
+
+all_na <- function(x, ...) {
+  UseMethod("all_na", x)
+}
+
+all_na.default <- function(x) {
+  all(is.nan(x) | is.na(x))
+}
+
+all_na.character <- function(x, convert = FALSE) {
+  found <- which(x == "NaN")
+  if(convert) {
+    x[found] <- NA_character_
+  } else if(length(found) > 0) {
+    warning("These values may be NA types `convert`ed to character:\n",
+            paste(paste0("    ",  x[found]), collapse = "\n"),
+            call. = FALSE)
+  }
+  all_na.default(x)
+}
+
+is_namespace_missing <- function(namespace) {
+  !requireNamespace(namespace, quietly = TRUE)
+}
+
+require_namespace <- function(namespace) {
+  if (is_namespace_missing) {
+    stop(sprintf("Package \"%s\" needed for this function to work. Please install it.", namespace),
+         call. = FALSE)
+  }
+}
