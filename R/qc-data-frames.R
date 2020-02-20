@@ -29,7 +29,7 @@
 qc_data_frames <- function(reference, target, index, string_distances = FALSE, ...) {
 
   if(string_distances) {
-    if(is_namespace_missing) {
+    if(is_namespace_missing("stringdist")) {
       warning("Package stringdist is not installed.  String distances will not be computed",
               call. = FALSE)
       string_distances = FALSE

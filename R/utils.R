@@ -87,7 +87,7 @@ is_namespace_missing <- function(namespace) {
 }
 
 require_namespace <- function(namespace) {
-  if (is_namespace_missing) {
+  if (is_namespace_missing(namespace)) {
     stop(sprintf("Package \"%s\" needed for this function to work. Please install it.", namespace),
          call. = FALSE)
   }
