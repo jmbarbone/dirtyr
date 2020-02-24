@@ -20,13 +20,14 @@ make_dirtyr <- function(n = 1e7) {
   dirty[dirty > .95] <- Inf
   dirty
 }
-dirty <- make_dirtyr(100)
+
+# dirty <- make_dirtyr(100)
 
 # saveRDS(make_dirtyr(), "data/dirty.rds")
 # saveRDS(make_dirtyr(100), "data/dirty_small.rds")
 
 is_named <- function(x) {
-  # !is.null(names(x))
+  !is.null(names(x))
 }
 
 insert <- function(x, y, p) {
