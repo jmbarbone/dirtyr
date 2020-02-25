@@ -99,4 +99,6 @@ qc_data_frames <- function(reference, target, index, string_distances = FALSE, .
           })
 }
 
+safe_anti_join <- purrr::safely(dplyr::anti_join)
+
 globalVariables(c("comparison"))
