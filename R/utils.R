@@ -12,20 +12,6 @@ if_then <- function(x, FUN, y) {
   if(FUN(x)) y else x
 }
 
-make_dirtyr <- function(n = 1e7) {
-  set.seed(42)
-  dirty <- as.data.frame(matrix(data = stats::runif(n), ncol = 20))
-  dirty[dirty < .05] <- NaN
-  dirty[dirty > .99] <- -Inf
-  dirty[dirty > .95] <- Inf
-  dirty
-}
-
-# dirty <- make_dirtyr(100)
-
-# saveRDS(make_dirtyr(), "data/dirty.rds")
-# saveRDS(make_dirtyr(100), "data/dirty_small.rds")
-
 is_named <- function(x) {
   !is.null(names(x))
 }
@@ -43,8 +29,6 @@ suppress_wm <- function(x) {
 
 #' @importFrom dplyr anti_join
 #' @importFrom purrr safely
-
-safe_anti_join <- safely(anti_join)
 
 short_class <- function(x) {
   cl <- class(x)
