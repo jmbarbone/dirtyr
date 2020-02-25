@@ -6,13 +6,14 @@ Authors@R:
            family = "Barbone",
            role = c("aut", "cre"),
            email = "jmbarbone@gmail.com",
-           comment = c(ORCID = "YOUR-ORCID-ID"))
+           comment = c(ORCID = "0000-0001-9788-3628"))
 Description: Functions and wrappers for dealing with
     and exploring "dirty"" data.
 License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
 Depends:
+    R (>= 2.10),
     dplyr,
     magrittr,
     purrr,
