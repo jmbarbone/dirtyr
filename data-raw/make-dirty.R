@@ -13,8 +13,8 @@ make_dirtyr <- function(n = 20) {
 
 dirty_small <- make_dirtyr
 dirty <- make_dirtyr(100)
-dirty_large <- make_dirtyr(1e7)
+# dirty_large <- make_dirtyr(1e7)
 
 use_data(dirty_small, overwrite = TRUE)
 use_data(dirty, overwrite = TRUE)
-use_data(dirty_large, overwrite = TRUE)
+# use_data(dirty_large, overwrite = TRUE)
