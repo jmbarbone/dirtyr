@@ -5,6 +5,9 @@
 #' @param df A data.frame
 #' @param index The name of the column to reindex by
 #' @param new_index the new order of the index
+#'
+#' @importFrom stats na.omit
+#'
 #' @export
 #'
 #' @examples
