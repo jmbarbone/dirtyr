@@ -25,5 +25,5 @@ to_boolean(x, "Y", "N", names = TRUE)
 
 x <- c(1, 2, 3, 4)
 to_boolean(x, 1, 2)
-to_boolean(x, "<= 1", ">= 2")
+to_boolean(x, "<= 1", ">= 2", names = TRUE)
 }

@@ -15,7 +15,7 @@
 #'
 #' x <- c(1, 2, 3, 4)
 #' to_boolean(x, 1, 2)
-#' to_boolean(x, "<= 1", ">= 2")
+#' to_boolean(x, "<= 1", ">= 2", names = TRUE)
 
 to_boolean <- function(x, true, false = NULL, names = FALSE) {
   stopifnot(!is.logical(x) || is.vector(x))
@@ -23,7 +23,7 @@ to_boolean <- function(x, true, false = NULL, names = FALSE) {
 }
 
 #' @export
-to_boolean.default <- function(x, true, false = NULL) {
+to_boolean.default <- function(x, true, false = NULL, names = FALSE) {
   if(is.null(false)) {
     res <- logical(length(x))
     res[x == true & !is.na(x)] <- TRUE
@@ -32,11 +32,12 @@ to_boolean.default <- function(x, true, false = NULL) {
     res[x == true & !is.na(x)] <- TRUE
     res[x == false & !is.na(x)] <- FALSE
   }
+  if(names) names(res) <- x
   res
 }
 
 #' @export
-to_boolean.numeric <- function(x, true, false = NULL) {
+to_boolean.numeric <- function(x, true, false = NULL, names = FALSE) {
   if(is.null(false)) {
     res <- logical(length(x))
   } else {
@@ -58,6 +59,7 @@ to_boolean.numeric <- function(x, true, false = NULL) {
          },
          numeric = {res[x == false] <- FALSE},
          integer = {res[x == false] <- FALSE})
+  if(names) names(res) <- x
   res
 }
 
