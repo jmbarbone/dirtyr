@@ -18,14 +18,23 @@ maybe_numeric(x, names = FALSE)
 Wrappers for working with numeric vectors
 }
 \details{
-The biggest difference in `as_numeric` compared to `as.numeric` is that it returns values of `NaN`
+The biggest difference in `as_numeric` compared to `as.numeric` is that it returns values of `NaN`.
 rather than `NA` and does not through an error.
+Factors are also specially handled as a numeric value is derived from the factor value rather
+than the factor level.
 
 `maybe_numeric` can be used to check is a value, possibly stored as text, can be safely converted.
 }
 \examples{
+## with characters
 x <- c(as.character(1:5), NA, letters[1:2], "1e4")
 suppressWarnings(as.numeric(x))  ## will throw an error
 as_numeric(x)                    ## converts NA to NaN
 maybe_numeric(x, names = TRUE)
+
+## With factors
+f <- factor(c(seq(0, 1, .2), "No", "Na_character_"))
+suppressWarnings(as.numeric(f))  ## uses factor level instead of text
+as_numeric(f)                    ## uses text values instead
+maybe_numeric(f, names = TRUE)
 }
