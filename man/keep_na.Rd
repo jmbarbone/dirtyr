@@ -5,15 +5,25 @@
 \alias{keep_nin}
 \title{Filter for missing data}
 \usage{
-keep_na(df, cols = NULL)
+keep_na(df, ...)
 
-keep_nin(df, cols)
+keep_nin(df, ...)
 }
 \arguments{
 \item{df}{A data.frame.}
 
-\item{cols}{Columns to include.  If NULL, all columns will be examined.}
+\item{...}{Columns to include.  If not included, all columns filtered on.}
 }
 \description{
 Filter rows for missing data
+}
+\details{
+`...` supports tidy select
+}
+\examples{
+\notrun{
+load(dirtyr)
+keep_na(dirty, V8)
+keep_nin(dirty, V4)
+}
 }
