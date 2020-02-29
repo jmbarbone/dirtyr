@@ -15,5 +15,7 @@
 expand_factor_seq <- function(x, min_level = min(x), by = 1L) {
   stopifnot(is.ordered(x) & is.integer(by) & by >= 1L)
   lvls <- levels(x)
-  factor(lvls[seq(which(lvls == min_level), as.numeric(max(x)), by)], levels = lvls, ordered = TRUE)
+  factor(lvls[seq(which(lvls == min_level), as.numeric(max(x)), by)],
+         levels = lvls,
+         ordered = TRUE)
 }
