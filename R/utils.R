@@ -43,8 +43,13 @@ short_class <- function(x) {
   }
 }
 
+## this is just, as.numeric(f) isn't it?
 which_level <- function(f) {
   sapply(f, function(f) which(f == levels(f)), USE.NAMES = FALSE)
+}
+
+none <- function(..., na.rm = FALSE) {
+  !any(..., na.rm = na.rm)
 }
 
 all_na <- function(x, ...) {
