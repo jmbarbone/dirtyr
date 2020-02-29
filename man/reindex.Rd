@@ -4,21 +4,27 @@
 \alias{reindex}
 \title{Re-index}
 \usage{
-reindex(df, index, new_index)
+reindex(df, index, new_index, add_empty = FALSE)
 }
 \arguments{
 \item{df}{A data.frame}
 
 \item{index}{The name of the column to reindex by}
 
-\item{new_index}{the new order of the index}
+\item{new_index}{The new order of the index as a vector}
+
+\item{add_empty}{Logical, whether to keep empty values when index isn't present}
 }
 \description{
 Re-index a column based on a new index
 }
+\details{
+When implementing the `add_empty` argument, NA values in the same class as the data.frame (df)
+are assigned.
+}
 \examples{
-iris1 <- head(iris, 5)
+iris1 <- head(iris, 5) \%>\% as_tibble
 iris1$index <- 1:5
-iris2 <- iris1[c(2, 3, 5, 4, 1), ]
-reindex(iris1, "index", iris2$index)
+reindex(iris1, "index", seq(2, 8, 2))
+reindex(iris1, "index", seq(2, 8, 2), add_empty = TRUE)
 }
