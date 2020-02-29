@@ -12,6 +12,7 @@ qc <- function(target, reference, ...) {
 
 #' @export
 qc.default <- function(target, reference) {
+  stopifnot(class(target) == class(reference))
   warning("No qc method available.", call. = FALSE)
 }
 
@@ -19,12 +20,12 @@ qc.default <- function(target, reference) {
 qc.character <- function(target, reference, string_dist = FALSE, ignore_case = FALSE, ...) {
   if(ignore_case) {
     tar <- tolower(target)
-    ref <- tolower(ref)
+    ref <- tolower(reference)
   } else {
     tar <- target
     ref <- reference
   }
-  x <- tar != ref
+  x <- suppress_wm(tar != ref)
   x <- x | is.na(x)
   xs <- sum(x)
   if(xs == 0) {
@@ -50,13 +51,6 @@ qc.character <- function(target, reference, string_dist = FALSE, ignore_case = F
   res
 }
 
-target = c("this", "that", "those", "what?")
-reference = c("thas", "THAT", "what are those?", "what")
-string_dist = TRUE
-ignore_case = TRUE
-# try <- qc(target, reference)
-# attr(try, "differences")
-
 #' @export
 qc.ordered <- function(target, reference, threshold = 0, ..., string_dist = FALSE) {
   lvls <- levels(target)
@@ -65,7 +59,7 @@ qc.ordered <- function(target, reference, threshold = 0, ..., string_dist = FALS
     qc(as.character(target), as.character(reference), string_dist = string_dist)
   }
 
-  diffs <- which_level(target) - which_level(reference)
+  diffs <- suppress_wm(as.numeric(target) - as.numeric(reference))
   x <- abs(diffs) > threshold | is.na(diffs)
   res <- data.frame(
     target = as.character(target[x]),
@@ -76,11 +70,6 @@ qc.ordered <- function(target, reference, threshold = 0, ..., string_dist = FALS
   attr(res, "differences") <- x
   res
 }
-target = factor(letters[1:5], letters, ordered = TRUE)
-reference = factor(c("a", "b", "j", "e", "e"), letters, ordered = TRUE)
-threshold = 0
-# qc(target, reference, string_dist = TRUE)
-# attr(.Last.value, "differences")
 
 #' @export
 qc.factor <- function(target, reference, string_dist = FALSE) {
@@ -89,15 +78,9 @@ qc.factor <- function(target, reference, string_dist = FALSE) {
   qc.character(target, reference, string_dist = FALSE, ignore_case = FALSE)
 }
 
-target = factor(letters[1:5], letters, ordered = FALSE)
-reference = factor(c("a", "b", "j", "e", "e"), letters, ordered = FALSE)
-threshold = 0
-# qc(target, reference, string_dist = FALSE)
-# attr(.Last.value, "string_dist")
-
 #' @export
 qc.numeric <- function(target, reference, threshold = 0) {
-  diffs <- target - reference
+  diffs <- suppress_wm(target - reference)
   x <- abs(diffs) > threshold | is.na(diffs)
   res <- data.frame(
     target = as.character(target[x]),
@@ -113,22 +96,17 @@ qc.numeric <- function(target, reference, threshold = 0) {
 qc.integer <- function(target, reference, threshold = 0) {
   qc.numeric(target, reference, threshold = threshold)
 }
-# qc(target = 1:5, reference = c(1:2, 8, 10, 11), threshold = 1)
 
 #' @export
 qc.Date <- function(target, reference, threshold = 0) {
   qc.numeric(target, reference, threshold = threshold)
 }
 
-# qc(as.Date(c("2019-01-12", "2010-05-20")),
-#    as.Date(c("2019-01-14", "2019-05-20")))
-# attributes(.Last.value)
-
 #' @export
-qc.data.frame <- function(target, reference, index, string_dist = FALSE, ...) {
+qc.data.frame <- function(target, reference, index, string_dist = FALSE, add_empty = TRUE, ...) {
   if(!is_named(index)) names(index) <- index
 
-  reind_ref <- reindex(reference, names(index), reference[[index]])
+  reind_tar <- reindex(target, names(index), reference[[index]], add_empty = TRUE)
 
   cols <- colnames(reference)
   valid_cols <- cols[cols %in% colnames(target) & cols != names(index)]
@@ -137,51 +115,24 @@ qc.data.frame <- function(target, reference, index, string_dist = FALSE, ...) {
   lapply(valid_cols,
          function(vc) {
            qc_col_implement(
-             tar = target[[vc]],
-             ref = reind_ref[[vc]],
-             ind = target[[names(index)]],
+             tar = reind_tar[[vc]],
+             ref = reference[[vc]],
+             ind = reference[[index]],
              vc = vc)
          }) %>%
     Reduce(rbind, .)
 }
 
-# qc(target, reference, "index")
-
 # implementation of qc for each column
 qc_col_implement <- function(tar, ref, ind, vc) {
   temp <- qc(tar, ref)
   if(nrow(temp) == 0) return(NULL)
-  cbind(data.frame(index = ind[attr(temp, "differences")],
+  diff_attr <- attr(temp, "differences")
+  cbind(data.frame(index = ind[diff_attr | is.na(diff_attr)],
                    comparison = rep(vc, nrow(temp)),
                    stringsAsFactors = FALSE),
         temp)
 }
-
-# target <- data.frame(
-#   index = letters[1:4],
-#   col1 = c(1:4),
-#   col2 = c(2:5),
-#   col3 = c("abc", "aaa", "bbb", "ccc"),
-#   col4 = as.Date(c("2019-12-01", "2019-02-21", "2000-05-20", "2019-12-17")),
-#   col5 = factor(letters[1:4], levels = letters, ordered = TRUE),
-#   stringsAsFactors = FALSE
-# )
-#
-# reference <- data.frame(
-#   index = letters[1:4],
-#   col1 = c(1, 2, 10, 4),
-#   col2 = c(1, 3, 4, 4),
-#   col3 = c("def", "aaa", "bbb", "nonsense"),
-#   col4 = as.Date(c("2019-12-10", "2019-02-22", "2000-05-20", "2019-12-17")),
-#   col5 = factor(letters[c(3, 7, 11, 13)], levels = letters, ordered = TRUE),
-#   stringsAsFactors = FALSE
-# )
-#
-# reference <- reference[c(2, 3, 1, 4), ]
-# index = "index"
-# str_dist = FALSE
-
-# qc(target, reference, "index")
 
 
 # Global variables ----------------------------------------------------------------------------
