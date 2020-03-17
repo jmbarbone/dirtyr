@@ -11,7 +11,7 @@ qc <- function(target, reference, ...) {
 }
 
 #' @export
-qc.default <- function(target, reference) {
+qc.default <- function(target, reference, ...) {
   stopifnot(class(target) == class(reference))
   warning("No qc method available.", call. = FALSE)
 }
@@ -72,14 +72,14 @@ qc.ordered <- function(target, reference, threshold = 0, ..., string_dist = FALS
 }
 
 #' @export
-qc.factor <- function(target, reference, string_dist = FALSE) {
+qc.factor <- function(target, reference, string_dist = FALSE, ...) {
   message("qc.factor will default to character if not ordered")
   if(string_dist) warning("String distances will not be computed for factors", call. = FALSE)
   qc.character(target, reference, string_dist = FALSE, ignore_case = FALSE)
 }
 
 #' @export
-qc.numeric <- function(target, reference, threshold = 0) {
+qc.numeric <- function(target, reference, threshold = 0, ...) {
   diffs <- suppress_wm(target - reference)
   x <- abs(diffs) > threshold | is.na(diffs)
   res <- data.frame(
@@ -93,12 +93,12 @@ qc.numeric <- function(target, reference, threshold = 0) {
 }
 
 #' @export
-qc.integer <- function(target, reference, threshold = 0) {
+qc.integer <- function(target, reference, threshold = 0, ...) {
   qc.numeric(target, reference, threshold = threshold)
 }
 
 #' @export
-qc.Date <- function(target, reference, threshold = 0) {
+qc.Date <- function(target, reference, threshold = 0, ...) {
   qc.numeric(target, reference, threshold = threshold)
 }
 
