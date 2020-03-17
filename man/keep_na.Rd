@@ -21,7 +21,7 @@ Filter rows for missing data
 `...` supports tidy select
 }
 \examples{
-\notrun{
+\dontrun{
 load(dirtyr)
 keep_na(dirty, V8)
 keep_nin(dirty, V4)

@@ -9,12 +9,14 @@
 #' `...` supports tidy select
 #'
 #' @importFrom dplyr filter_at
+#' @importFrom dplyr filter_all
 #' @importFrom dplyr vars
 #' @importFrom dplyr any_vars
+#' @importFrom rlang enquos
 #' @export
 #' @name keep_na
 #' @examples
-#' \notrun{
+#' \dontrun{
 #' load(dirtyr)
 #' keep_na(dirty, V8)
 #' keep_nin(dirty, V4)
