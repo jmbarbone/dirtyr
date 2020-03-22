@@ -8,7 +8,7 @@ Authors@R:
            email = "jmbarbone@gmail.com",
            comment = c(ORCID = "0000-0001-9788-3628"))
 Description: Functions and wrappers for dealing with
-    and exploring "dirty"" data.
+    and exploring 'dirty' data.
 License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
