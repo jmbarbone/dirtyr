@@ -5,14 +5,14 @@ library(tidyverse)
 
 make_dirtyr <- function(n = 20) {
   set.seed(42)
-  dirty <- as_tibble(matrix(data = stats::runif(n), ncol = 20))
+  dirty <- as_tibble(matrix(data = stats::runif(n), ncol = 5))
   dirty[dirty < .05] <- NaN
   dirty[dirty > .99] <- -Inf
   dirty[dirty > .95] <- Inf
   dirty
 }
 
-dirty_small <- make_dirtyr
+dirty_small <- make_dirtyr()
 dirty <- make_dirtyr(100)
 # dirty_large <- make_dirtyr(1e7)
 
