@@ -28,38 +28,46 @@ new_index <- reference[["index"]]
 str_dist = FALSE
 add_empty = TRUE
 
-qc(target, reference, "index")
+# qc(target, reference, "index")
 
 
 test_that("ordered", {
   target = factor(letters[1:5], letters, ordered = TRUE)
   reference = factor(c("a", "b", "j", "e", "e"), letters, ordered = TRUE)
   threshold = 0
-  qc(target, reference, string_dist = TRUE)
-  attr(.Last.value, "differences")
+  res <- qc(target, reference, string_dist = TRUE)
+  a <- attr(.Last.value, "differences")
+  expect_visible(res)
+  expect_visible(a)
 })
 
 test_that("factor", {
   target = factor(letters[1:5], letters, ordered = FALSE)
   reference = factor(c("a", "b", "j", "e", "e"), letters, ordered = FALSE)
   threshold = 0
-  qc(target, reference, string_dist = FALSE)
-  attr(.Last.value, "string_dist")
+  res <- qc(target, reference, string_dist = FALSE)
+  a <- attr(.Last.value, "string_dist")
+  expect_visible(res)
+  expect_visible(a)
 })
 
-test_that("numeric", {
-
-})
+# test_that("numeric", {
+#
+# })
 
 test_that("integer", {
   res <- qc(target = 1:5, reference = c(1:2, 8, 10, 11), threshold = 1)
-  attr(res, "differences")
+  a <- attr(res, "differences")
+  expect_visible(res)
+  expect_visible(a)
 })
 
 test_that("Date", {
-  qc(as.Date(c("2019-01-12", "2010-05-20")),
-     as.Date(c("2019-01-14", "2019-05-20")))
-  attributes(.Last.value)
+  res <- qc(as.Date(c("2019-01-12", "2010-05-20")),
+            as.Date(c("2019-01-14", "2019-05-20")))
+  a <- attributes(.Last.value)
+  expect_visible(res)
+  expect_visible(a)
 })
 
 test_that("characters", {
@@ -67,6 +75,9 @@ test_that("characters", {
   reference = c("thas", "THAT", "what are those?", "what")
   string_dist = TRUE
   ignore_case = TRUE
-  try <- qc(target, reference)
-  attr(try, "differences")
+  res <- qc(target, reference)
+  a <- attr(res, "differences")
+  expect_visible(res)
+  expect_visible(a)
 })
+
