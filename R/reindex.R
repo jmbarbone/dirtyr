@@ -32,8 +32,9 @@ reindex <- function(df, index, new_index, add_empty = FALSE) {
     if(none(nas)) return(temp)
     ls <- lapply(df[cn[cn != "index"]], class_na)
     ls[[index]] <- c(new_index[which(nas)])
-    return(rbind(temp,
-                 as.data.frame(ls, stringsAsFactors = FALSE)))
+    new_df <- as.data.frame(ls, stringsAsFactors = FALSE)
+    colnames(new_df) <- colnames(temp)
+    return(rbind(temp, new_df))
   }
   temp
 
