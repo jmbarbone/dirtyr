@@ -17,9 +17,9 @@ Depends:
     dplyr,
     magrittr,
     purrr,
+    rlang,
     utils
 Suggests: 
     stringdist,
-    rlang,
     testthat
 RoxygenNote: 7.1.0

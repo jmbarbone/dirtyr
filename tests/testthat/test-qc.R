@@ -81,3 +81,10 @@ test_that("characters", {
   expect_visible(a)
 })
 
+test_that("logical", {
+  res <- function() {
+    qc(c(  NA, TRUE,  TRUE, FALSE, NA),
+       c(TRUE, TRUE, FALSE, FALSE, NA))}
+  expect_visible(res())
+  expect_warning(res(), NA)
+})

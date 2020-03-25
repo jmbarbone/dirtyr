@@ -17,6 +17,32 @@ qc.default <- function(target, reference, ...) {
 }
 
 #' @export
+qc.logical <- function(target, reference, ...) {
+
+  if(all_na(target) & class(reference)  != "logical") {
+    class(target) <- class(reference)
+    message("target is all `NA`; trying method for:", class(reference))
+    qc(target, reference, ...)
+  }
+  x <- !mapply(identical, target, reference)
+  diffs <- as.numeric(target) - as.numeric(reference)
+
+  xs <- sum(x)
+  if(xs == 0) {
+    message("No differences found")
+    return(invisible())
+  }
+  res <- data.frame(
+    target = target[x],
+    reference = reference[x],
+    difference = diffs[x],
+    stringsAsFactors = FALSE
+  )
+  attr(res, "differences") <- x
+  res
+}
+
+#' @export
 qc.character <- function(target, reference, string_dist = FALSE, ignore_case = FALSE, ...) {
   if(ignore_case) {
     tar <- tolower(target)
@@ -27,6 +53,7 @@ qc.character <- function(target, reference, string_dist = FALSE, ignore_case = F
   }
   x <- suppress_wm(tar != ref)
   x <- x | is.na(x)
+  # x <- !mapply(identical, tar, ref)
   xs <- sum(x)
   if(xs == 0) {
     message("No differences found")
@@ -103,6 +130,11 @@ qc.Date <- function(target, reference, threshold = 0, ...) {
 }
 
 #' @export
+qc.POSIXct <- function(target, reference, threshold = 0, ...) {
+  qc.numeric(target, reference, threshold = threshold)
+}
+
+#' @export
 qc.data.frame <- function(target, reference, index, string_dist = FALSE, add_empty = TRUE, ...) {
   if(!is_named(index)) names(index) <- index
 
@@ -126,7 +158,7 @@ qc.data.frame <- function(target, reference, index, string_dist = FALSE, add_emp
 # implementation of qc for each column
 qc_col_implement <- function(tar, ref, ind, vc) {
   temp <- qc(tar, ref)
-  if(nrow(temp) == 0) return(NULL)
+  if(is.null(temp) || nrow(temp) == 0) return(NULL)
   diff_attr <- attr(temp, "differences")
   cbind(data.frame(index = ind[diff_attr | is.na(diff_attr)],
                    comparison = rep(vc, nrow(temp)),
