@@ -11,8 +11,6 @@
 #' When implementing the `add_empty` argument, NA values in the same class as the data.frame (df)
 #' are assigned.
 #'
-#' @importFrom stats na.omit
-#'
 #' @export
 #'
 #' @examples
@@ -25,7 +23,7 @@ reindex <- function(df, index, new_index, add_empty = FALSE) {
   cn <- colnames(df)
   stopifnot(index %in% cn)
   m <- match(new_index, df[[index]])
-  temp <- df[na.omit(m), ]
+  temp <- df[remove_na(m), ]
 
   if(add_empty) {
     nas <- is.na(m)
