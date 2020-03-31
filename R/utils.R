@@ -82,3 +82,4 @@ require_namespace <- function(namespace) {
          call. = FALSE)
   }
 }
+
