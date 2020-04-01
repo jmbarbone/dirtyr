@@ -143,16 +143,17 @@ qc.data.frame <- function(target, reference, index, string_dist = FALSE, add_emp
   cols <- colnames(reference)
   valid_cols <- cols[cols %in% colnames(target) & cols != names(index)]
 
-  # valid_cols <- valid_cols[4]
-  lapply(valid_cols,
-         function(vc) {
-           qc_col_implement(
-             tar = reind_tar[[vc]],
-             ref = reference[[vc]],
-             ind = reference[[index]],
-             vc = vc)
-         }) %>%
-    Reduce(rbind, .)
+  res <- r_bind(lapply(
+    valid_cols,
+    function(vc) {
+      qc_col_implement(
+        tar = reind_tar[[vc]],
+        ref = reference[[vc]],
+        ind = reference[[index]],
+        vc = vc)
+    }))
+  # as_tibble(res[order(res[[index]]), ])
+  as_tibble(res)
 }
 
 # implementation of qc for each column
@@ -166,6 +167,13 @@ qc_col_implement <- function(tar, ref, ind, vc) {
         temp)
 }
 
+# qc(test_data_target$index,
+#    test_data_reference$index)
+#
+#
+# qc(test_data_target[1:2],
+#    test_data_reference[1:2],
+#    "index")
 
 # Global variables ----------------------------------------------------------------------------
 
