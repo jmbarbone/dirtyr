@@ -18,6 +18,7 @@ Depends:
     magrittr,
     purrr,
     rlang,
+    tibble,
     utils
 Suggests: 
     stringdist,
