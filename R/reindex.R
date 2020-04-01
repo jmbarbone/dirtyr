@@ -33,7 +33,7 @@ reindex <- function(x, index = NULL, new_index, ...) {
 # reindex(x, new_index = new_index)
 
 #' @export
-reindex.default <- function(x, index = NULL, new_index) {
+reindex.default <- function(x, index = NULL, new_index, ...) {
   stopifnot(is_named(x) & is.null(index))
   n <- sort(unique(c(names(x), names(new_index))))
   res <- x[n]
