@@ -2,14 +2,16 @@
 #'
 #' Re-index a column based on a new index
 #'
-#' @param df A data.frame
+#' @param x A data.frame or named vector
+#' @param ... Additional arguments passed to methods
 #' @param index The name of the column to reindex by
 #' @param new_index The new order of the index as a vector
-#' @param add_empty Logical, whether to keep empty values when index isn't present
+#' @param add_empty Logical, whether to keep empty values when index isn't
+#'   present
 #'
 #' @details
-#' When implementing the `add_empty` argument, NA values in the same class as the data.frame (df)
-#' are assigned.
+#' When implementing the `add_empty` argument, NA values in the same class as
+#'   the data.frame (df) are assigned.
 #'
 #' @export
 #'
@@ -19,21 +21,44 @@
 #' reindex(iris1, "index", seq(2, 8, 2))
 #' reindex(iris1, "index", seq(2, 8, 2), add_empty = TRUE)
 
-reindex <- function(df, index, new_index, add_empty = FALSE) {
-  cn <- colnames(df)
+reindex <- function(x, index = NULL, new_index, ...) {
+  UseMethod("reindex", x)
+}
+
+# x <- 2:5
+# index <- NULL
+# names(x) <- letters[x]
+# new_index <- c(1, 3, 5, 7)
+# names(new_index) <- letters[new_index]
+# reindex(x, new_index = new_index)
+
+#' @export
+reindex.default <- function(x, index = NULL, new_index) {
+  stopifnot(is_named(x) & is.null(index))
+  n <- sort(unique(c(names(x), names(new_index))))
+  res <- x[n]
+  names(res) <- n
+  res
+}
+
+#' @export
+reindex.data.frame <- function(x, index = NULL, new_index, add_empty = FALSE, ...) {
+  stopifnot(!is.null(index))
+  cn <- colnames(x)
   stopifnot(index %in% cn)
-  m <- match(new_index, df[[index]])
-  temp <- df[remove_na(m), ]
+  m <- match(new_index, x[[index]])
+  temp <- x[remove_na(m), ]
 
   if(add_empty) {
     nas <- is.na(m)
     if(none(nas)) return(temp)
-    ls <- lapply(df[cn[cn != "index"]], class_na)
+    ls <- lapply(x[cn[cn != index]], class_na)
     ls[[index]] <- c(new_index[which(nas)])
     new_df <- as.data.frame(ls, stringsAsFactors = FALSE)
-    colnames(new_df) <- colnames(temp)
-    return(rbind(temp, new_df))
+    cnt <- colnames(temp)
+    new_df <- as.data.frame(ls, stringsAsFactors = FALSE)[cnt]
+    colnames(new_df) <- cnt
+    temp <- r_bind(temp, new_df)
   }
-  temp
-
+  as_tibble(temp)
 }
