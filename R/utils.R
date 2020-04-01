@@ -89,4 +89,13 @@ remove_na <- function(x) {
   x[!(is.na(x) | is.nan(x))]
 }
 
+r_bind <- function(...) {
+  f <- function(x, y) {
+    rbind(x, y,
+          deparse.level = 0,
+          make.row.names = FALSE,
+          factor.exclude = TRUE,
+          stringsAsFactors = FALSE)
+  }
+  Reduce(f, ...)
 }
