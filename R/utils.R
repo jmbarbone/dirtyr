@@ -86,5 +86,7 @@ require_namespace <- function(namespace) {
 }
 
 remove_na <- function(x) {
-  x[is.na(x) | is.nan(x)]
+  x[!(is.na(x) | is.nan(x))]
+}
+
 }
