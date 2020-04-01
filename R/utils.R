@@ -1,6 +1,8 @@
 #' @importFrom magrittr %>%
-#' @export
 magrittr::`%>%`
+
+#' @importFrom tibble as_tibble
+tibble::as_tibble
 
 df <- data.frame(
   A = c(1, 2, NA, 4, 5, NA),
