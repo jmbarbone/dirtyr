@@ -66,7 +66,7 @@ qc.character <- function(target, reference, string_dist = FALSE, ignore_case = F
                     ...,
                     USE.NAMES = FALSE)
   } else {
-    diffs <- rep(NaN, xs)
+    diffs <- rep(NA_real_, xs)
   }
   res <- data.frame(
     target = target[x],
