@@ -39,7 +39,7 @@ is_true <- function(x, ...) {
 
 #' @export
 is_true.default <- function(x, ...) {
-  stop("\'x\' must be a logical vector")
+  logical_error()
 }
 
 #' @export
@@ -56,7 +56,7 @@ is_false <- function(x, ...) {
 
 #' @export
 is_false.default <- function(x, ...) {
-  stop("\'x\' must be a logical vector")
+  logical_error()
 }
 
 #' @export
@@ -73,7 +73,7 @@ is_na <- function(x, ...) {
 
 #' @export
 is_na.default <- function(x, ...) {
-  stop("\'x\' must be a logical vector")
+  logical_error()
 }
 
 #' @export
@@ -140,3 +140,13 @@ all_false <- function(x) {
 all_false_x <- function(x) {
   if (all_na(x)) NA else all(is_false(x))
 }
+
+logical_error <- function() {
+  stop(sprintf(
+    "%s : `%s` is not logical.",
+    deparse(sys.calls()[[sys.nframe()-2]]),
+    deparse(sys.calls()[[2]][[2]])
+  ))
+}
+
+# is_na("bad variable")
