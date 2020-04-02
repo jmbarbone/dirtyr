@@ -9,7 +9,8 @@ knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>",
   fig.path = "man/figures/README-",
-  out.width = "100%"
+  out.width = "100%",
+  results = "markup"
 )
 library(dirtyr, warn.conflicts = FALSE, verbose = FALSE)
 ```
@@ -40,7 +41,6 @@ Not every system will provide easily accessible dates.
 
 ```{r example date}
 x <- c("UN Feb 2000", "1958", "17 UNK 1992")
-
 unknown_date(x, format = "dmy")
 unknown_date(x, format = "dmy", possible = "latest")
 ```
@@ -60,5 +60,30 @@ reindex(x, new_index = new_index)
 
 ```{r example qc}
 
+```
+
+## Smaller things
+
+Easier conversions of non-numeric data to numeric (not just double).
+
+```{r example as_numeric}
+x <- c(as.character(1:5), NA, letters[1:2], "1e4")
+
+## Throws an error
+as.numeric(x)
+
+## Doesn't throw an error
+to_numeric(x)
+maybe_numeric(x, names = TRUE)
+```
+
+
+```{r example as_numeric 2}
+f <- factor(c(seq(0, 1, .2), "No", "Na_character_"))
+## Uses factor level instead of text
+suppressWarnings(as.numeric(f))
+## uses text values instead
+to_numeric(f)                    
+maybe_numeric(f, names = TRUE)
 ```
 
