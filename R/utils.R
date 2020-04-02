@@ -29,9 +29,6 @@ suppress_wm <- function(x) {
   suppressWarnings(suppressMessages(x))
 }
 
-#' @importFrom dplyr anti_join
-#' @importFrom purrr safely
-
 short_class <- function(x) {
   cl <- class(x)
   if("ordered" %in% cl) {
@@ -49,6 +46,9 @@ short_class <- function(x) {
 which_level <- function(f) {
   sapply(f, function(f) which(f == levels(f)), USE.NAMES = FALSE)
 }
+# f <- factor(letters)
+# which_level(f)
+# as.numeric(f)
 
 none <- function(..., na.rm = FALSE) {
   !any(..., na.rm = na.rm)
