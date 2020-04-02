@@ -4,7 +4,7 @@
 \alias{reindex}
 \title{Re-index}
 \usage{
-reindex(x, index = NULL, new_index, ...)
+reindex(x, index = NULL, new_index, add_empty = FALSE, ...)
 }
 \arguments{
 \item{x}{A data.frame or named vector}
@@ -13,10 +13,10 @@ reindex(x, index = NULL, new_index, ...)
 
 \item{new_index}{The new order of the index as a vector}
 
-\item{...}{Additional arguments passed to methods}
-
 \item{add_empty}{Logical, whether to keep empty values when index isn't
 present}
+
+\item{...}{Additional arguments passed to methods}
 }
 \description{
 Re-index a column based on a new index

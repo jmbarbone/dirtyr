@@ -21,7 +21,7 @@
 #' reindex(iris1, "index", seq(2, 8, 2))
 #' reindex(iris1, "index", seq(2, 8, 2), add_empty = TRUE)
 
-reindex <- function(x, index = NULL, new_index, ...) {
+reindex <- function(x, index = NULL, new_index, add_empty = FALSE, ...) {
   UseMethod("reindex", x)
 }
 
@@ -30,15 +30,18 @@ reindex <- function(x, index = NULL, new_index, ...) {
 # names(x) <- letters[x]
 # new_index <- c(1, 3, 5, 7)
 # names(new_index) <- letters[new_index]
-# reindex(x, new_index = new_index)
+# reindex(x, new_index = new_index, add_empty = FALSE)
+# reindex(x, new_index = new_index, add_empty = TRUE)
 
 #' @export
-reindex.default <- function(x, index = NULL, new_index, ...) {
+reindex.default <- function(x, index = NULL, new_index, add_empty = FALSE, ...) {
   stopifnot(is_named(x) & is.null(index))
-  n <- sort(unique(c(names(x), names(new_index))))
-  res <- x[n]
-  names(res) <- n
-  res
+  if(add_empty) {
+    n <- sort(unique(c(names(x), names(new_index))))
+    return(setNames(x[n], n))
+  }
+  setNames(x[names(new_index)], names(new_index))
+
 }
 
 #' @export
