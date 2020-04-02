@@ -87,12 +87,12 @@ maybe_integer(c(x, 1.2), names = TRUE)
 #>     1     2     3     4     5  <NA>     a     b   1e4   1.2 
 #>  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE FALSE
 
-## Throws an error
+## Throws a warning
 as.numeric(x)
 #> Warning: NAs introduced by coercion
 #> [1]     1     2     3     4     5    NA    NA    NA 10000
 
-## Doesn't throw an error
+## Doesn't throw a warning
 (res <- to_numeric(x))
 #> [1]     1     2     3     4     5    NA    NA    NA 10000
 
@@ -106,6 +106,9 @@ x %>%
   class()
 #> [1] "numeric"
 ```
+
+This has special behaviors for factors where the character label is used
+rather than the numeric level.
 
 ``` r
 f <- factor(c(seq(0, 1, .2), "No", "Na_character_"))
@@ -123,11 +126,11 @@ maybe_integer(f, names = TRUE)
 #>             1 Na_character_            No 
 #>          TRUE          TRUE          TRUE
 
-## Uses factor level instead of text
+## Uses factor level
 as.numeric(f)
 #> [1] 1 2 3 4 5 6 8 7
 
-## uses text values instead
+## uses text
 to_numeric(f)                    
 #> [1] 0.0 0.2 0.4 0.6 0.8 1.0  NA  NA
 ```

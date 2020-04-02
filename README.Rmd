@@ -87,10 +87,10 @@ maybe_integer(x, names = TRUE)
 
 maybe_integer(c(x, 1.2), names = TRUE)
 
-## Throws an error
+## Throws a warning
 as.numeric(x)
 
-## Doesn't throw an error
+## Doesn't throw a warning
 (res <- to_numeric(x))
 
 ## correctly identifies as integers
@@ -102,6 +102,7 @@ x %>%
   class()
 ```
 
+This has special behaviors for factors where the character label is used rather than the numeric level.
 
 ```{r example as_numeric 2}
 f <- factor(c(seq(0, 1, .2), "No", "Na_character_"))
@@ -111,10 +112,10 @@ maybe_numeric(f, names = TRUE)
 
 maybe_integer(f, names = TRUE)
 
-## Uses factor level instead of text
+## Uses factor level
 as.numeric(f)
 
-## uses text values instead
+## uses text
 to_numeric(f)                    
 ```
 
