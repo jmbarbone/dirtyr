@@ -8,6 +8,6 @@
 
 .onAttach <- function(libname, pkgname) {
   packageStartupMessage(
-    "Reminder: Check 'github.com/jmbarbone/dirty'r for updates."
+    "Reminder: Check 'github.com/jmbarbone/dirtyr' for updates."
     )
 }
