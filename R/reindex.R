@@ -61,7 +61,7 @@ reindex.data.frame <- function(x, index = NULL, new_index, add_empty = FALSE, ..
     cnt <- colnames(temp)
     new_df <- as.data.frame(ls, stringsAsFactors = FALSE)[cnt]
     colnames(new_df) <- cnt
-    temp <- r_bind(temp, new_df)
+    temp <- r_bind(list(temp, new_df))
   }
   as_tibble(temp)
 }

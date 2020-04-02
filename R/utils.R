@@ -89,13 +89,19 @@ remove_na <- function(x) {
   x[!(is.na(x) | is.nan(x))]
 }
 
-r_bind <- function(...) {
-  f <- function(x, y) {
-    rbind(x, y,
-          deparse.level = 0,
-          make.row.names = FALSE,
-          factor.exclude = TRUE,
-          stringsAsFactors = FALSE)
-  }
-  Reduce(f, ...)
+r_bind_fun <-  function(x, y) {
+  rbind(x, y,
+        deparse.level = 0,
+        make.row.names = FALSE,
+        factor.exclude = TRUE,
+        stringsAsFactors = FALSE)
+}
+
+#' rbind() for lists
+#'
+#' Apply rbind to a list of data.frames
+#'
+#' @param ls List of data frames to bind
+r_bind <- function(ls) {
+  Reduce(r_bind_fun, ls)
 }

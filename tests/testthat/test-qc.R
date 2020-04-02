@@ -88,3 +88,10 @@ test_that("logical", {
   expect_visible(res())
   expect_warning(res(), NA)
 })
+
+test_that("data frame", {
+  expect_visible(qc(target, reference, "index"))
+})
+
+# reindex(target, "index", reference$index, add_empty = TRUE)
+
