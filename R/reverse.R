@@ -27,5 +27,5 @@ reverse.data.frame <- function(x, ...) {
 
 #' @export
 reverse.matrix <- function(x, ...) {
-  if(nrow(x)) x[nrow(x):1, ] else x
+  if(nrow(x)) x[nrow(x):1L, ] else x
 }
