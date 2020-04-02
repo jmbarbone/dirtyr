@@ -36,7 +36,7 @@ to_numeric <- function(x, int = TRUE) {
 }
 
 #' @export
-to_numeric.default <- function(x) {
+to_numeric.default <- function(x, int = TRUE) {
   if(int & all(maybe_integer(x))) {
     n <- suppressWarnings(as.integer(x))
     n[is.na(n)] <- NA_integer_
@@ -48,7 +48,7 @@ to_numeric.default <- function(x) {
 }
 
 #' @export
-to_numeric.factor <- function(x) {
+to_numeric.factor <- function(x, int = TRUE) {
   if(int & all(maybe_integer(x))) {
     n <- suppressWarnings(as.integer(levels(x))[x])
     n[is.na(n)] <- NA_integer_
