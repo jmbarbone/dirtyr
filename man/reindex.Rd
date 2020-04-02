@@ -24,6 +24,7 @@ Re-index a column based on a new index
 \details{
 When implementing the `add_empty` argument, NA values in the same class as
   the data.frame (df) are assigned.
+The `index` and `new_index` must be not have any duplicates.
 }
 \examples{
 iris1 <- head(iris, 5) \%>\% as_tibble

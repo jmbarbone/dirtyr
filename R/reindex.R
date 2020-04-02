@@ -12,6 +12,7 @@
 #' @details
 #' When implementing the `add_empty` argument, NA values in the same class as
 #'   the data.frame (df) are assigned.
+#' The `index` and `new_index` must be not have any duplicates.
 #'
 #' @export
 #'
@@ -47,9 +48,12 @@ reindex.default <- function(x, index = NULL, new_index, add_empty = FALSE, ...) 
 #' @export
 reindex.data.frame <- function(x, index = NULL, new_index, add_empty = FALSE, ...) {
   stopifnot(!is.null(index))
+  xi <- x[[index]]
+  stopifnot(identical(xi, unique(xi)))
+  stopifnot(identical(new_index, unique(new_index)))
   cn <- colnames(x)
   stopifnot(index %in% cn)
-  m <- match(new_index, x[[index]])
+  m <- match(new_index, xi)
   temp <- x[remove_na(m), ]
 
   if(add_empty) {
