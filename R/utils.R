@@ -1,4 +1,5 @@
 #' @importFrom magrittr %>%
+#' @export
 magrittr::`%>%`
 
 #' @importFrom tibble as_tibble
