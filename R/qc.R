@@ -135,10 +135,10 @@ qc.POSIXct <- function(target, reference, threshold = 0, ...) {
 }
 
 #' @export
-qc.data.frame <- function(target, reference, index, string_dist = FALSE, add_empty = FALSE, ...) {
+qc.data.frame <- function(target, reference, index, string_dist = FALSE, keep_all = FALSE, ...) {
   if(!is_named(index)) names(index) <- index
 
-  reind_tar <- reindex(target, names(index), reference[[index]], add_empty = add_empty)
+  reind_tar <- reindex(target, names(index), reference[[index]], keep_all = keep_all)
 
   cols <- colnames(reference)
   valid_cols <- cols[cols %in% colnames(target) & cols != names(index)]

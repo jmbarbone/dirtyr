@@ -91,6 +91,8 @@ test_that("logical", {
 
 test_that("data frame", {
   expect_visible(qc(target, reference, "index"))
+  expect_false(identical(qc(target, reference, "index"),
+                         qc(target, reference, "index", keep_all = TRUE)))
 })
 
 # reindex(target, "index", reference$index, add_empty = TRUE)

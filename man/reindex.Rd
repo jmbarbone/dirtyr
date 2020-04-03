@@ -4,7 +4,7 @@
 \alias{reindex}
 \title{Re-index}
 \usage{
-reindex(x, index = NULL, new_index, add_empty = FALSE, ...)
+reindex(x, index = NULL, new_index, keep_all = FALSE, ...)
 }
 \arguments{
 \item{x}{A data.frame or named vector}
@@ -13,8 +13,8 @@ reindex(x, index = NULL, new_index, add_empty = FALSE, ...)
 
 \item{new_index}{The new order of the index as a vector}
 
-\item{add_empty}{Logical, whether to keep empty values when index isn't
-present}
+\item{keep_all}{Logical, whether to use only the index values in the
+`new_index` or to use all available index values}
 
 \item{...}{Additional arguments passed to methods}
 }
@@ -22,13 +22,13 @@ present}
 Re-index a column based on a new index
 }
 \details{
-When implementing the `add_empty` argument, NA values in the same class as
+When implementing the `keep_all` argument, NA values in the same class as
   the data.frame (df) are assigned.
 The `index` and `new_index` must be not have any duplicates.
 }
 \examples{
-iris1 <- head(iris, 5) \%>\% as_tibble
+iris1 <- head(iris, 5) \%>\% tibble::as_tibble()
 iris1$index <- 1:5
 reindex(iris1, "index", seq(2, 8, 2))
-reindex(iris1, "index", seq(2, 8, 2), add_empty = TRUE)
+reindex(iris1, "index", seq(2, 8, 2), keep_all = TRUE)
 }
