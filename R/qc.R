@@ -51,7 +51,6 @@ qc.logical <- function(target, reference, ...) {
   res
 }
 
-
 #' @export
 #' @rdname qc
 qc.character <- function(target, reference, string_dist = FALSE, ignore_case = FALSE, ...) {
@@ -79,9 +78,7 @@ qc.character <- function(target, reference, string_dist = FALSE, ignore_case = F
   } else {
     diffs <- rep(NA_real_, ds)
   }
-
   # qc_df(target, reference, diffs, x)
-
   res <- data_frame(target = target[d],
                     reference = reference[d],
                     difference = diffs)
@@ -94,13 +91,16 @@ qc.ordered <- function(target, reference, threshold = 0, ..., string_dist = FALS
   lvls <- levels(target)
   if(all(lvls != levels(reference))) {
     warning("Levels do not match, applying factor method")
-    qc(as.character(target), as.character(reference), string_dist = string_dist)
+    return(qc(as.character(target),
+              as.character(reference),
+              string_dist = string_dist))
   }
-
-  diffs <- suppress_wm(as.numeric(target) - as.numeric(reference))
-  x <- abs(diffs) > threshold | is.na(diffs)
-  res <- qc_df(target, reference, diffs, x)
-  attr(res, "differences") <- x
+  qc_name_check(target, reference)
+  d <- are_different(target, reference)
+  diffs <- as.integer(target) - as.integer(reference)
+  d <- d | diffs > threshold
+  res <- qc_df(target, reference, diffs[d], d)
+  attr(res, "differences") <- d
   res
 }
 

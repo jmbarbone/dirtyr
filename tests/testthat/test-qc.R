@@ -34,13 +34,24 @@ add_empty = TRUE
 # orderered ---------------------------------------------------------------
 
 test_that("ordered", {
-  target = factor(letters[1:5], letters, ordered = TRUE)
-  reference = factor(c("a", "b", "j", "e", "e"), letters, ordered = TRUE)
-  threshold = 0
-  res <- qc(target, reference, string_dist = TRUE)
-  a <- attr(.Last.value, "differences")
-  expect_visible(res)
-  expect_visible(a)
+
+  ## > Equal length ----
+  lvls <- c(LETTERS[1:6])
+
+  x <- setNames(nm = factor(LETTERS[2:4], levels = lvls, ordered = TRUE))
+  y <- setNames(nm = factor(LETTERS[1:6][-2], levels = lvls, ordered = TRUE))
+
+  exp <- data_frame(target = c(NA_character_, "B", NA_character_, NA_character_),
+                    reference = c("A", NA_character_, "E", "F"),
+                    difference = rep(NA_real_, 4))
+  res <- qc(x, y, string_dist = TRUE, ignore_case = TRUE)
+  expect_equivalent(res, exp)
+
+  ##  >> attributes ----
+  a <- attr(res, "differences")
+  b <- c(TRUE, TRUE, FALSE,  FALSE, TRUE, TRUE)
+  expect_equal(a, b)
+
 })
 
 # factor ------------------------------------------------------------------
