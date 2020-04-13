@@ -37,8 +37,8 @@ qc.logical <- function(target, reference, ...) {
   if(all_na(target) & class(reference) != "logical") {
     cr <- class(reference)
     class(target) <- cr
-    message("target is all `NA` ... trying method for: ", cr)
-    qc(target, reference, ...)
+    warning("target is all `NA` ... trying method for: ", cr)
+    return(qc(target, reference, ...))
   }
   d <- are_different(target, reference)
   if(!sum(d)) {
@@ -143,27 +143,16 @@ qc.POSIXct <- function(target, reference, threshold = 0, ...) {
 
 # utils -------------------------------------------------------------------
 
-
-# test_x <- setNames(nm = letters[c(1, 3, 5)])
-# test_y <- setNames(nm = letters[2:6])
-#
-# qc(test_x, test_y)
-# {
-#   if(!is.null(get0("x"))) remove(x)
-#   if(!is.null(get0("y"))) remove(y)
-#   if(!is.null(get0("target"))) remove(target)
-#   if(!is.null(get0("reference"))) remove(reference)
-# }
-
 qc_name_check <- function(x, y) {
   if(is_named(x) & is_named(y)) {
     assign(deparse(substitute(x)),
-           reindex(x, new_index = y, keep_all = TRUE),
+           reindex(x, y, keep_all = TRUE),
            envir = parent.frame(1))
     assign(deparse(substitute(y)),
-           reindex(y, new_index = x, keep_all = TRUE),
+           reindex(y, x, keep_all = TRUE),
            envir = parent.frame(1))
   }
+  invisible()
 }
 
 qc_df <- function(target, reference, difference, d) {

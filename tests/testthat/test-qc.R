@@ -147,20 +147,29 @@ test_that("logical", {
 
 
   ## > All NAs ----
+  ## This will force the evaluation of x according to class(y)
   x <- rep(NA, 5)
   y <- character(5)
   expect_warning(qc(x, y), "target is all `NA` ... trying method for: character")
 
-  qc(as.character(x), y)
+  expect_warning(qc(as.character(x), y), NA)
+  expect_warning(qc(x, rep(NA_real_, 5)),
+                    "target is all `NA` ... trying method for: numeric")
 
-  qc(rep(NA_character_, 5), character(5))
 })
 
-test_that("data frame", {
-  expect_visible(qc(target, reference, "index"))
-  expect_false(identical(qc(target, reference, "index"),
-                         qc(target, reference, "index", keep_all = TRUE)))
+
+# utils -------------------------------------------------------------------
+
+test_that("qc_name_check", {
+  xx <- x <- setNames(nm = letters[c(1, 3, 5)])
+  yy <- y <- setNames(nm = letters[2:6])
+  qc_name_check(xx, yy)
+  expect_equal(xx, reindex(x, new_index = y, keep_all = TRUE))
+  expect_equal(yy, reindex(y, new_index = x, keep_all = TRUE))
+
 })
+
 
 # reindex(target, "index", reference$index, add_empty = TRUE)
 
