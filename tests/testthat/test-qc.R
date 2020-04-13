@@ -31,6 +31,8 @@ add_empty = TRUE
 # qc(target, reference, "index")
 
 
+# orderered ---------------------------------------------------------------
+
 test_that("ordered", {
   target = factor(letters[1:5], letters, ordered = TRUE)
   reference = factor(c("a", "b", "j", "e", "e"), letters, ordered = TRUE)
@@ -40,6 +42,8 @@ test_that("ordered", {
   expect_visible(res)
   expect_visible(a)
 })
+
+# factor ------------------------------------------------------------------
 
 test_that("factor", {
   target = factor(letters[1:5], letters, ordered = FALSE)
@@ -51,9 +55,16 @@ test_that("factor", {
   expect_visible(a)
 })
 
-# test_that("numeric", {
-#
-# })
+
+# numeric -----------------------------------------------------------------
+
+
+test_that("numeric", {
+
+})
+
+
+# integer -----------------------------------------------------------------
 
 test_that("integer", {
   res <- qc(target = 1:5, reference = c(1:2, 8, 10, 11), threshold = 1)
@@ -61,6 +72,9 @@ test_that("integer", {
   expect_visible(res)
   expect_visible(a)
 })
+
+
+# Date --------------------------------------------------------------------
 
 test_that("Date", {
   res <- qc(as.Date(c("2019-01-12", "2010-05-20")),
@@ -70,23 +84,76 @@ test_that("Date", {
   expect_visible(a)
 })
 
-test_that("characters", {
-  target = c("this", "that", "those", "what?")
-  reference = c("thas", "THAT", "what are those?", "what")
-  string_dist = TRUE
-  ignore_case = TRUE
-  res <- qc(target, reference)
-  a <- attr(res, "differences")
-  expect_visible(res)
-  expect_visible(a)
+
+# POSXITct ----------------------------------------------------------------
+
+test_that("POSITct", {
+
 })
 
+# character ---------------------------------------------------------------
+
+test_that("character", {
+
+  ## > Equal length ----
+  x <- c("this", "that", "those", "what?")
+  y <- c("thas", "THAT", "what are those?", "what")
+  exp <- data_frame(target = x[-2],
+                    reference = y[-2],
+                    difference = c(1, 10, 1))
+  res <- qc(x, y, string_dist = TRUE, ignore_case = TRUE)
+  expect_equivalent(res, exp)
+
+  ##  >> attributes ----
+  b <- c(TRUE, FALSE, TRUE, TRUE)
+  a <- attr(res, "differences")
+  expect_equal(a, b)
+
+  ## > Named vectors ----
+  x <- c(a = 1, b = 2, c = NA_character_, d = NA_character_)
+  y <- c(a = 1, b = 3, c = NA_character_, d = 0)
+  res <- qc(x, y)
+  exp <- data_frame(target = c(2, NA_character_),
+                    reference = c('3', '0'),
+                    difference = rep(NA_real_, 2))
+  expect_equivalent(res, exp)
+
+  ### > attributes----
+  a <- attr(res, "differences")
+  b <- c(a = FALSE, b = TRUE, c = FALSE, d = TRUE)
+  expect_equal(a, b)
+
+})
+
+
+# logical -----------------------------------------------------------------
+
+
 test_that("logical", {
-  res <- function() {
-    qc(c(  NA, TRUE,  TRUE, FALSE, NA),
-       c(TRUE, TRUE, FALSE, FALSE, NA))}
-  expect_visible(res())
-  expect_warning(res(), NA)
+
+  ## > Equal length ----
+  x <- c(  NA, TRUE,  TRUE, FALSE, NA)
+  y <- c(TRUE, TRUE, FALSE, FALSE, NA)
+  exp <- data_frame(target = c(NA_character_, TRUE),
+                    reference = c("TRUE", "FALSE"),
+                    difference = c(NA_real_, 1.0))
+  res <- qc(x, y)
+  expect_equivalent(res, exp)
+
+  ## >> attributes ----
+  a <- attr(res, "differences")
+  b <- c(TRUE, FALSE, TRUE, FALSE, FALSE)
+  expect_equal(a, b)
+
+
+  ## > All NAs ----
+  x <- rep(NA, 5)
+  y <- character(5)
+  expect_warning(qc(x, y), "target is all `NA` ... trying method for: character")
+
+  qc(as.character(x), y)
+
+  qc(rep(NA_character_, 5), character(5))
 })
 
 test_that("data frame", {
