@@ -9,6 +9,17 @@ test_that("index.default", {
                reindex(a, new_index = b))
   expect_equal(reindex(a, b), res1)
   expect_equal(reindex(a, b, keep_all = TRUE), res2)
+
+  ## unnamed
+  expect_equal(reindex(a, b),
+               reindex(a, remove_names(b)))
+  expect_equal(reindex(a, b), keep_all = TRUE,
+               reindex(a, remove_names(b)), keep_all = TRUE)
+
+  expect_equal(reindex(a, new_index = b),
+               reindex(a, new_index = remove_names(b)))
+  expect_equal(reindex(a, new_index = b), keep_all = TRUE,
+               reindex(a, new_index = remove_names(b)), keep_all = TRUE)
 })
 
 test_that("index.data.frame", {
