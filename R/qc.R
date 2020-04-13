@@ -143,6 +143,21 @@ qc.POSIXct <- function(target, reference, threshold = 0, ...) {
 
 # utils -------------------------------------------------------------------
 
+are_different <- function(x, y) {
+  if(length(x) != length(y)) {
+    stop(sprintf("`%s` and `%s` are not the same length",
+                 deparse(substitute(x)),
+                 deparse(substitute(y))),
+         call. = FALSE)
+  }
+  res <- x != y
+  n <- is.na(res)
+  if(sum(n)) {
+    res[n] <- !(is.na(x[n]) & is.na(y[n]))
+  }
+  res
+}
+
 qc_name_check <- function(x, y) {
   if(is_named(x) & is_named(y)) {
     assign(deparse(substitute(x)),

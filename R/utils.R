@@ -116,12 +116,3 @@ r_bind_fun <-  function(x, y) {
 r_bind <- function(ls) {
   Reduce(r_bind_fun, ls)
 }
-
-are_different <- function(x, y) {
-  res <- x != y
-  n <- is.na(res)
-  if(sum(n)) {
-    res[n] <- !(is.na(x[n]) & is.na(y[n]))
-  }
-  res
-}
