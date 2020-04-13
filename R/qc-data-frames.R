@@ -4,101 +4,75 @@
 #'
 #' @details
 #' All values from the target and reference will be returned as characters.
+#' `keep_all` is passed to the `keep_all` argument in `reindex()`.
+#' If this is `TRUE`,
 #'
-#' @param reference,target tables to join
+#' @param target Targer (test) table
+#' @param reference Reference table
 #' @param index The name or the index
-#' @param string_distances Logical.  If true, distances will be calculated.
+#' @param keep_all Logical, passed to `reindex()` (see details)
 #' @param ... additional arguments passed to [stringdist::stringdist]
 #'
 #' @return
 #' A data.frame with the index values and differences in target and comparisons.
 #'
-#' @importFrom dplyr mutate
-#' @importFrom dplyr mutate_at
-#' @importFrom dplyr full_join
-#' @importFrom purrr map_dfr
-#'
 #' @export
 
-# qc_data_frame(df1, df2, "Patient #", string_distances = FALSE)
-# reference <- df1
-# target <- df2
-# index <- "Patient #"
-# string_distances <- TRUE
+qc_data_frame <- function(target, reference, index, keep_all = FALSE, ...) {
+  if(!is_named(index)) names(index) <- index
 
-qc_data_frames <- function(reference, target, index, string_distances = FALSE, ...) {
+  reind_tar <- reindex(target, names(index), reference[[index]], keep_all = keep_all)
 
-  if(string_distances) {
-    if(is_namespace_missing("stringdist")) {
-      warning("Package stringdist is not installed.  String distances will not be computed",
-              call. = FALSE)
-      string_distances = FALSE
-    }
-  }
+  cols <- colnames(reference)
+  valid_cols <- cols[cols %in% colnames(target) & cols != names(index)]
 
-  cn1 <- colnames(reference)
-  cn1 <- cn1[cn1 != index]
-
-  col_names <- cn1[match(colnames(target), cn1, nomatch = 0L)]
-
-  index_values <- reference[[index]][match(target[[index]], reference[[index]], nomatch = 0L)]
-
-  ref <- reference[reference[[index]] %in% index_values, ]
-  tar <- target[target[[index]] %in% index_values, ]
-
-  map_dfr(col_names,
-          function(x) {
-
-            a <- safe_anti_join(ref[c(index, x)],
-                                tar[c(index, x)],
-                                by = c(index, x))$result
-            b <- safe_anti_join(tar[c(index, x)],
-                                ref[c(index, x)],
-                                by = c(index, x))$result
-
-            if(is.null(a) & is.null(b)) {
-              return(data.frame(
-                index = NA_character_,
-                reference = NA_character_,
-                target = NA_character_,
-                comparison = x,
-                difference = NaN,
-                stringsAsFactors = FALSE))
-            }
-
-            res <- full_join(a, b,
-                             by = index,
-                             suffix = c("_reference", "_target")) %>%
-              `names<-`(c("index", "reference", "target")) %>%
-              mutate(comparison = x)
-
-            cl <- unique(c(short_class(res$reference), short_class(res$target)))
-            if(length(cl) > 1) cl <- "incomparible"
-
-            n_rows <- nrow(res)
-
-            if(n_rows == 0) {
-              res$difference <- rep(NaN, n_rows)
-            } else {
-              res$difference <- switch(cl,
-                                       character = {
-                                         if(string_distances) {
-                                           mapply(stringdist::stringdist,
-                                                  a = res$reference,
-                                                  b = res$target,
-                                                  ...,
-                                                  USE.NAMES = FALSE)
-                                         } else {
-                                           rep(NaN, n_rows)
-                                         }},
-                                       numeric = with(res, reference - target),
-                                       ordered = with(res, which_level(reference) - which_level(target)),
-                                       NaN)
-            }
-            mutate_at(res, c("reference", "target", "comparison"), as.character)
-          })
+  res <- r_bind(lapply(
+    valid_cols,
+    function(vc) {
+      qc_col_implement(
+        tar = reind_tar[[vc]],
+        ref = reference[[vc]],
+        ind = reference[[index]],
+        vc = vc)
+    }))
+  # as_tibble(res[order(res[[index]]), ])
+  as_tibble(res)
 }
 
-safe_anti_join <- purrr::safely(dplyr::anti_join)
+# implementation of qc for each column
+qc_col_implement <- function(tar, ref, ind, vc) {
+  temp <- qc(tar, ref)
+  if(is.null(temp) || nrow(temp) == 0) return(NULL)
+  diff_attr <- attr(temp, "differences")
+  cbind(data_frame(index = ind[diff_attr | is.na(diff_attr)],
+                   comparison = rep(vc, nrow(temp))),
+        temp)
+}
 
-globalVariables(c("comparison"))
+
+# qc(test_data_target$index,
+#    test_data_reference$index)
+#
+#
+# qc(test_data_target[1:2],
+#    test_data_reference[1:2],
+#    "index")
+
+check_index_df <- function(index) {
+  UseMethod("check_index_df", index)
+}
+
+
+# Todos -------------------------------------------------------------------
+
+## Add listing argument for setting parameters at each column
+
+if(FALSE) {
+  list(var1 = list(param1 = 1,
+                   param2 = TRUE),
+       var2 = list(param1 = 2,
+                   param2 = FALSE))
+  ## allow iteration
+  list(var1 = list(param1 = 1, param2 = FALSE),
+       param2 = TRUE)
+}

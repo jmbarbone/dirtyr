@@ -134,46 +134,8 @@ qc.POSIXct <- function(target, reference, threshold = 0, ...) {
   qc.numeric(target, reference, threshold = threshold)
 }
 
-#' @export
-qc.data.frame <- function(target, reference, index, string_dist = FALSE, keep_all = FALSE, ...) {
-  if(!is_named(index)) names(index) <- index
 
-  reind_tar <- reindex(target, names(index), reference[[index]], keep_all = keep_all)
 
-  cols <- colnames(reference)
-  valid_cols <- cols[cols %in% colnames(target) & cols != names(index)]
-
-  res <- r_bind(lapply(
-    valid_cols,
-    function(vc) {
-      qc_col_implement(
-        tar = reind_tar[[vc]],
-        ref = reference[[vc]],
-        ind = reference[[index]],
-        vc = vc)
-    }))
-  # as_tibble(res[order(res[[index]]), ])
-  as_tibble(res)
-}
-
-# implementation of qc for each column
-qc_col_implement <- function(tar, ref, ind, vc) {
-  temp <- qc(tar, ref)
-  if(is.null(temp) || nrow(temp) == 0) return(NULL)
-  diff_attr <- attr(temp, "differences")
-  cbind(data.frame(index = ind[diff_attr | is.na(diff_attr)],
-                   comparison = rep(vc, nrow(temp)),
-                   stringsAsFactors = FALSE),
-        temp)
-}
-
-# qc(test_data_target$index,
-#    test_data_reference$index)
-#
-#
-# qc(test_data_target[1:2],
-#    test_data_reference[1:2],
-#    "index")
 
 # Global variables ----------------------------------------------------------------------------
 
