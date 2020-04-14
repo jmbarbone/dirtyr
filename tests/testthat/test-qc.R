@@ -31,29 +31,74 @@ add_empty = TRUE
 # qc(target, reference, "index")
 
 
+# orderered ---------------------------------------------------------------
+
 test_that("ordered", {
-  target = factor(letters[1:5], letters, ordered = TRUE)
-  reference = factor(c("a", "b", "j", "e", "e"), letters, ordered = TRUE)
-  threshold = 0
-  res <- qc(target, reference, string_dist = TRUE)
-  a <- attr(.Last.value, "differences")
-  expect_visible(res)
-  expect_visible(a)
+
+  ## > Equal length ----
+  lvls <- c(LETTERS[1:10])
+
+  x <- c(A = "A", B = "C", D = "D", E = "A", G = "J")
+  y <- setNames(nm = LETTERS)[c(1:5, 10)]
+  x <- factor(x, levels = lvls, ordered = TRUE)
+  y <- factor(y, levels = lvls, ordered = TRUE)
+
+  exp <- data_frame(target = c("C", NA_character_, "A", "J", NA_character_),
+                    reference = c("B", "C", "E", NA_character_, "J"),
+                    difference = c(1, NA_real_, -4, NA_real_, NA_real_))
+  res <- qc(x, y)
+  expect_equivalent(res, exp)
+
+  a <- attr(res, "difference")
+  b <- c(FALSE, TRUE, TRUE, FALSE, TRUE, TRUE, TRUE)
+  expect_equivalent(res, exp)
+
+  expect_warning(qc(x, y, string_dist = TRUE),
+                 "String distances will not be computed for factors")
+
+  ## Threshold ----
+  # qc(x, y, threshold = 2)
+
+  z <- factor(x, levels = lvls[1:4], ordered = FALSE)
+  exp <- data_frame(target = "J", reference = NA_character_, difference = NA_real_)
+  expect_warning(qc(x, z), "Levels do not match, applying factor method")
+  expect_equivalent(suppressWarnings(qc(x, z)), exp)
 })
+
+# factor ------------------------------------------------------------------
 
 test_that("factor", {
-  target = factor(letters[1:5], letters, ordered = FALSE)
-  reference = factor(c("a", "b", "j", "e", "e"), letters, ordered = FALSE)
-  threshold = 0
-  res <- qc(target, reference, string_dist = FALSE)
-  a <- attr(.Last.value, "string_dist")
-  expect_visible(res)
-  expect_visible(a)
+  ## > Equal length ----
+  lvls <- c(LETTERS[1:6])
+
+  x <- setNames(nm = factor(LETTERS[2:4], levels = lvls, ordered = FALSE))
+  y <- setNames(nm = factor(LETTERS[1:6][-2], levels = lvls, ordered = FALSE))
+
+  exp <- data_frame(target = c(NA_character_, "B", NA_character_, NA_character_),
+                    reference = c("A", NA_character_, "E", "F"),
+                    difference = rep(NA_real_, 4))
+  res <- qc(x, y)
+  expect_equivalent(res, exp)
+
+  ##  >> attributes ----
+  a <- attr(res, "differences")
+  b <- c(TRUE, TRUE, FALSE,  FALSE, TRUE, TRUE)
+  expect_equal(a, b)
+
+  expect_warning(qc(x, y, string_dist = TRUE),
+                 "String distances will not be computed for factors")
 })
 
-# test_that("numeric", {
-#
-# })
+
+# numeric -----------------------------------------------------------------
+
+
+test_that("numeric", {
+  expect_true(TRUE)
+})
+
+
+# integer -----------------------------------------------------------------
 
 test_that("integer", {
   res <- qc(target = 1:5, reference = c(1:2, 8, 10, 11), threshold = 1)
@@ -61,6 +106,9 @@ test_that("integer", {
   expect_visible(res)
   expect_visible(a)
 })
+
+
+# Date --------------------------------------------------------------------
 
 test_that("Date", {
   res <- qc(as.Date(c("2019-01-12", "2010-05-20")),
@@ -70,30 +118,97 @@ test_that("Date", {
   expect_visible(a)
 })
 
-test_that("characters", {
-  target = c("this", "that", "those", "what?")
-  reference = c("thas", "THAT", "what are those?", "what")
-  string_dist = TRUE
-  ignore_case = TRUE
-  res <- qc(target, reference)
-  a <- attr(res, "differences")
-  expect_visible(res)
-  expect_visible(a)
+
+# POSXITct ----------------------------------------------------------------
+
+test_that("POSITct", {
+  expect_true(TRUE)
 })
+
+# character ---------------------------------------------------------------
+
+test_that("character", {
+
+  ## > Equal length ----
+  x <- c("this", "that", "those", "what?")
+  y <- c("thas", "THAT", "what are those?", "what")
+  exp <- data_frame(target = x[-2],
+                    reference = y[-2],
+                    difference = c(1, 10, 1))
+  res <- qc(x, y, string_dist = TRUE, ignore_case = TRUE)
+  expect_equivalent(res, exp)
+
+  ##  >> attributes ----
+  b <- c(TRUE, FALSE, TRUE, TRUE)
+  a <- attr(res, "differences")
+  expect_equal(a, b)
+
+  ## > Named vectors ----
+  x <- c(a = 1, b = 2, c = NA_character_, d = NA_character_)
+  y <- c(a = 1, b = 3, c = NA_character_, d = 0)
+  res <- qc(x, y)
+  exp <- data_frame(target = c(2, NA_character_),
+                    reference = c('3', '0'),
+                    difference = rep(NA_real_, 2))
+  expect_equivalent(res, exp)
+
+  ### > attributes----
+  a <- attr(res, "differences")
+  b <- c(a = FALSE, b = TRUE, c = FALSE, d = TRUE)
+  expect_equal(a, b)
+
+  ## > No differences ---
+  x <- setNames(nm = letters[1:5])
+  y <- setNames(nm = letters[c(3, 4, 1, 5, 2)])
+  expect_message(qc(x, y), "No differences found")
+
+})
+
+
+# logical -----------------------------------------------------------------
+
 
 test_that("logical", {
-  res <- function() {
-    qc(c(  NA, TRUE,  TRUE, FALSE, NA),
-       c(TRUE, TRUE, FALSE, FALSE, NA))}
-  expect_visible(res())
-  expect_warning(res(), NA)
+
+  ## > Equal length ----
+  x <- c(  NA, TRUE,  TRUE, FALSE, NA)
+  y <- c(TRUE, TRUE, FALSE, FALSE, NA)
+  exp <- data_frame(target = c(NA_character_, TRUE),
+                    reference = c("TRUE", "FALSE"),
+                    difference = c(NA_real_, 1.0))
+  res <- qc(x, y)
+  expect_equivalent(res, exp)
+
+  ## >> attributes ----
+  a <- attr(res, "differences")
+  b <- c(TRUE, FALSE, TRUE, FALSE, FALSE)
+  expect_equal(a, b)
+
+
+  ## > All NAs ----
+  ## This will force the evaluation of x according to class(y)
+  x <- rep(NA, 5)
+  y <- character(5)
+  expect_warning(qc(x, y), "target is all `NA` ... trying method for: character")
+
+  expect_warning(qc(as.character(x), y), NA)
+  expect_warning(qc(x, rep(NA_real_, 5)),
+                    "target is all `NA` ... trying method for: numeric")
+
 })
 
-test_that("data frame", {
-  expect_visible(qc(target, reference, "index"))
-  expect_false(identical(qc(target, reference, "index"),
-                         qc(target, reference, "index", keep_all = TRUE)))
+
+# utils -------------------------------------------------------------------
+
+test_that("qc_name_check", {
+  xx <- x <- setNames(nm = letters[c(1, 3, 5)])
+  yy <- y <- setNames(nm = letters[2:6])
+  qc_name_check(xx, yy)
+  expect_equal(xx, reindex(x, new_index = y, keep_all = TRUE))
+  expect_equal(yy, reindex(y, new_index = x, keep_all = TRUE))
+
 })
+
 
 # reindex(target, "index", reference$index, add_empty = TRUE)
 

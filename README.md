@@ -21,7 +21,7 @@ You can install the most recent development version of dirtyr from
 [GitHub](https://github.com/jmbarbone/dirtyr) with:
 
 ``` r
-remotes::install_github("jmbarbone/dirtyr")
+devtools::install_github("jmbarbone/dirtyr")
 ```
 
 ## Dates

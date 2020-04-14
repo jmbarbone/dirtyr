@@ -1,49 +1,61 @@
 #' Quality check
 #'
-#' Perform a QC on an object
+#' Perform a QC on an object.
+#'
+#' @details
+#' If both objects are named, they will be `reindex()`'d to be of equal length
+#'   and sorted with matching names.
+#' `qc.factor` will default to character if not ordered
+#'
+#' @return
+#' A data.frame with each target and reference value and their difference.
+#' Values in the `target` and `reference` column will always be returned as character.
+#'
+#' \item{differences}{A logical vector (`TRUE` or `FALSE` if items were different)}
 #'
 #' @param target Target
 #' @param reference Reference
 #' @param ... Additional arguments passed to methods
+#' @param ignore_case Should cases be ignored?
+#' @param string_dist If TRUE, string distances calculated with [stringr::stringdist]
 #' @export
 qc <- function(target, reference, ...) {
   UseMethod("qc", target)
 }
 
 #' @export
+#' @rdname qc
 qc.default <- function(target, reference, ...) {
   stopifnot(class(target) == class(reference))
   warning("No qc method available.", call. = FALSE)
 }
 
 #' @export
+#' @rdname qc
 qc.logical <- function(target, reference, ...) {
+  qc_name_check(target, reference)
 
-  if(all_na(target) & class(reference)  != "logical") {
-    class(target) <- class(reference)
-    message("target is all `NA`; trying method for:", class(reference))
-    qc(target, reference, ...)
+  if(all_na(target) & class(reference) != "logical") {
+    cr <- class(reference)
+    class(target) <- cr
+    warning("target is all `NA` ... trying method for: ", cr)
+    return(qc(target, reference, ...))
   }
-  x <- !mapply(identical, target, reference)
-  diffs <- as.numeric(target) - as.numeric(reference)
-
-  xs <- sum(x)
-  if(xs == 0) {
+  d <- are_different(target, reference)
+  if(!sum(d)) {
     message("No differences found")
     return(invisible())
   }
-  res <- data.frame(
-    target = target[x],
-    reference = reference[x],
-    difference = diffs[x],
-    stringsAsFactors = FALSE
-  )
-  attr(res, "differences") <- x
+
+  res <- qc_df(target, reference, (target - reference)[d], d)
+  attr(res, "differences") <- setNames(d, names(target))
   res
 }
 
 #' @export
+#' @rdname qc
 qc.character <- function(target, reference, string_dist = FALSE, ignore_case = FALSE, ...) {
+  qc_name_check(target, reference)
   if(ignore_case) {
     tar <- tolower(target)
     ref <- tolower(reference)
@@ -51,58 +63,64 @@ qc.character <- function(target, reference, string_dist = FALSE, ignore_case = F
     tar <- target
     ref <- reference
   }
-  x <- suppress_wm(tar != ref)
-  x <- x | is.na(x)
-  # x <- !mapply(identical, tar, ref)
-  xs <- sum(x)
-  if(xs == 0) {
+  d <- are_different(tar, ref)
+  ds <- sum(d)
+  if(!ds) {
     message("No differences found")
     return(invisible())
   }
   if(string_dist) {
+    require_namespace("stringdist")
     diffs <- mapply(stringdist::stringdist,
-                    a = tar[x],
-                    b = ref[x],
+                    a = tar[d],
+                    b = ref[d],
                     ...,
                     USE.NAMES = FALSE)
   } else {
-    diffs <- rep(NA_real_, xs)
+    diffs <- rep(NA_real_, ds)
   }
-  res <- data.frame(
-    target = target[x],
-    reference = reference[x],
-    difference = diffs,
-    stringsAsFactors = FALSE
-  )
-  attr(res, "differences") <- x
+  # qc_df(target, reference, diffs, x)
+  res <- data_frame(target = as.character(target)[d],
+                    reference = as.character(reference)[d],
+                    difference = diffs)
+  attr(res, "differences") <- d
   res
 }
 
+# target = x
+# reference = y
+# threshold = 0
+# string_dist = FALSE
+
 #' @export
 qc.ordered <- function(target, reference, threshold = 0, ..., string_dist = FALSE) {
-  lvls <- levels(target)
-  if(all(lvls != levels(reference))) {
-    warning("Levels do not match, applying factor method")
-    qc(as.character(target), as.character(reference), string_dist = string_dist)
+  # lvls <- levels(target)
+  if(anyNA(match(levels(target), levels(reference)))) {
+    warning("Levels do not match, applying factor method", call. = FALSE)
+    return(qc.factor(unordered(target),
+                     unordered(reference),
+                     string_dist = string_dist,
+                     ...))
   }
-
-  diffs <- suppress_wm(as.numeric(target) - as.numeric(reference))
-  x <- abs(diffs) > threshold | is.na(diffs)
-  res <- data.frame(
-    target = as.character(target[x]),
-    reference = as.character(reference[x]),
-    difference = diffs[x],
-    stringsAsFactors = FALSE
-  )
-  attr(res, "differences") <- x
+  if(string_dist) {
+    warning("String distances will not be computed for factors", call. = FALSE)
+  }
+  qc_name_check(target, reference)
+  d <- are_different(target, reference)
+  diffs <- as.integer(target) - as.integer(reference)
+  d <- d | diffs > threshold
+  res <- qc_df(target, reference, diffs[d], d)
+  attr(res, "differences") <- d
   res
 }
 
 #' @export
 qc.factor <- function(target, reference, string_dist = FALSE, ...) {
-  message("qc.factor will default to character if not ordered")
-  if(string_dist) warning("String distances will not be computed for factors", call. = FALSE)
-  qc.character(target, reference, string_dist = FALSE, ignore_case = FALSE)
+  qc_name_check(target, reference)
+  if(string_dist) {
+    warning("String distances will not be computed for factors", call. = FALSE)
+  }
+  qc.character(target, reference, string_dist = FALSE, ignore_case = FALSE, ...)
 }
 
 #' @export
@@ -134,47 +152,52 @@ qc.POSIXct <- function(target, reference, threshold = 0, ...) {
   qc.numeric(target, reference, threshold = threshold)
 }
 
-#' @export
-qc.data.frame <- function(target, reference, index, string_dist = FALSE, keep_all = FALSE, ...) {
-  if(!is_named(index)) names(index) <- index
 
-  reind_tar <- reindex(target, names(index), reference[[index]], keep_all = keep_all)
+# utils -------------------------------------------------------------------
 
-  cols <- colnames(reference)
-  valid_cols <- cols[cols %in% colnames(target) & cols != names(index)]
+are_different <- function(x, y) {
+  if(length(x) != length(y)) {
+    stop(sprintf("`%s` and `%s` are not the same length",
+                 deparse(substitute(x)),
+                 deparse(substitute(y))),
+         call. = FALSE)
+  }
 
-  res <- r_bind(lapply(
-    valid_cols,
-    function(vc) {
-      qc_col_implement(
-        tar = reind_tar[[vc]],
-        ref = reference[[vc]],
-        ind = reference[[index]],
-        vc = vc)
-    }))
-  # as_tibble(res[order(res[[index]]), ])
-  as_tibble(res)
+  res <- if("factor" %in% class(x)) {
+    as.integer(x) != as.integer(y)
+  } else {
+    x != y
+  }
+
+  n <- is.na(res)
+  if(sum(n)) {
+    res[n] <- !(is.na(x[n]) & is.na(y[n]))
+  }
+  res
 }
 
-# implementation of qc for each column
-qc_col_implement <- function(tar, ref, ind, vc) {
-  temp <- qc(tar, ref)
-  if(is.null(temp) || nrow(temp) == 0) return(NULL)
-  diff_attr <- attr(temp, "differences")
-  cbind(data.frame(index = ind[diff_attr | is.na(diff_attr)],
-                   comparison = rep(vc, nrow(temp)),
-                   stringsAsFactors = FALSE),
-        temp)
+unordered <- function(f) {
+  factor(f,
+         levels = levels(f),
+         ordered = FALSE)
 }
 
-# qc(test_data_target$index,
-#    test_data_reference$index)
-#
-#
-# qc(test_data_target[1:2],
-#    test_data_reference[1:2],
-#    "index")
+qc_name_check <- function(x, y) {
+  if(is_named(x) & is_named(y)) {
+    assign(deparse(substitute(x)),
+           reindex(x, y, keep_all = TRUE),
+           envir = parent.frame(1))
+    assign(deparse(substitute(y)),
+           reindex(y, x, keep_all = TRUE),
+           envir = parent.frame(1))
+  }
+  invisible()
+}
 
-# Global variables ----------------------------------------------------------------------------
-
-globalVariables(c("."))
+qc_df <- function(target, reference, difference, d) {
+  data_frame(
+    target = as.character(target[d]),
+    reference = as.character(reference[d]),
+    difference = as.double(difference)
+  )
+}

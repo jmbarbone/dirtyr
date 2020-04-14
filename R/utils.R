@@ -5,11 +5,20 @@ magrittr::`%>%`
 #' @importFrom tibble as_tibble
 tibble::as_tibble
 
-df <- data.frame(
-  A = c(1, 2, NA, 4, 5, NA),
-  B = c(6, NA, 8, 9, 9, NaN),
-  C = c("A", "B", "C", "D", "E", NA_character_)
-)
+data_frame <- function(..., row.names = NULL, check.rows = !is.null(row.names)) {
+  data.frame(...,
+             row.names = row.names,
+             check.rows = check.rows,
+             check.names = FALSE,
+             fix.empty.names = FALSE,
+             stringsAsFactors = FALSE)
+}
+
+# df <- data.frame(
+#   A = c(1, 2, NA, 4, 5, NA),
+#   B = c(6, NA, 8, 9, 9, NaN),
+#   C = c("A", "B", "C", "D", "E", NA_character_)
+# )
 
 if_then <- function(x, FUN, y) {
   if(FUN(x)) y else x
