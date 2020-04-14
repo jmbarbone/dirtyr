@@ -5,6 +5,7 @@
 #' @details
 #' If both objects are named, they will be `reindex()`'d to be of equal length
 #'   and sorted with matching names.
+#' `qc.factor` will default to character if not ordered
 #'
 #' @return
 #' A data.frame with each target and reference value and their difference.
@@ -65,7 +66,7 @@ qc.character <- function(target, reference, string_dist = FALSE, ignore_case = F
   d <- are_different(tar, ref)
   ds <- sum(d)
   if(!ds) {
-    message("No differences found between.")
+    message("No differences found")
     return(invisible())
   }
   if(string_dist) {
@@ -79,21 +80,30 @@ qc.character <- function(target, reference, string_dist = FALSE, ignore_case = F
     diffs <- rep(NA_real_, ds)
   }
   # qc_df(target, reference, diffs, x)
-  res <- data_frame(target = target[d],
-                    reference = reference[d],
+  res <- data_frame(target = as.character(target)[d],
+                    reference = as.character(reference)[d],
                     difference = diffs)
   attr(res, "differences") <- d
   res
 }
 
+# target = x
+# reference = y
+# threshold = 0
+# string_dist = FALSE
+
 #' @export
 qc.ordered <- function(target, reference, threshold = 0, ..., string_dist = FALSE) {
-  lvls <- levels(target)
-  if(all(lvls != levels(reference))) {
-    warning("Levels do not match, applying factor method")
-    return(qc(as.character(target),
-              as.character(reference),
-              string_dist = string_dist))
+  # lvls <- levels(target)
+  if(anyNA(match(levels(target), levels(reference)))) {
+    warning("Levels do not match, applying factor method", call. = FALSE)
+    return(qc.factor(unordered(target),
+                     unordered(reference),
+                     string_dist = string_dist,
+                     ...))
+  }
+  if(string_dist) {
+    warning("String distances will not be computed for factors", call. = FALSE)
   }
   qc_name_check(target, reference)
   d <- are_different(target, reference)
@@ -106,9 +116,11 @@ qc.ordered <- function(target, reference, threshold = 0, ..., string_dist = FALS
 
 #' @export
 qc.factor <- function(target, reference, string_dist = FALSE, ...) {
-  message("qc.factor will default to character if not ordered")
-  if(string_dist) warning("String distances will not be computed for factors", call. = FALSE)
-  qc.character(target, reference, string_dist = FALSE, ignore_case = FALSE)
+  qc_name_check(target, reference)
+  if(string_dist) {
+    warning("String distances will not be computed for factors", call. = FALSE)
+  }
+  qc.character(target, reference, string_dist = FALSE, ignore_case = FALSE, ...)
 }
 
 #' @export
@@ -150,12 +162,24 @@ are_different <- function(x, y) {
                  deparse(substitute(y))),
          call. = FALSE)
   }
-  res <- x != y
+
+  res <- if("factor" %in% class(x)) {
+    as.integer(x) != as.integer(y)
+  } else {
+    x != y
+  }
+
   n <- is.na(res)
   if(sum(n)) {
     res[n] <- !(is.na(x[n]) & is.na(y[n]))
   }
   res
+}
+
+unordered <- function(f) {
+  factor(f,
+         levels = levels(f),
+         ordered = FALSE)
 }
 
 qc_name_check <- function(x, y) {

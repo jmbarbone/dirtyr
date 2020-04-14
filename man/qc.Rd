@@ -38,4 +38,5 @@ Perform a QC on an object.
 \details{
 If both objects are named, they will be `reindex()`'d to be of equal length
   and sorted with matching names.
+`qc.factor` will default to character if not ordered
 }

@@ -36,15 +36,48 @@ add_empty = TRUE
 test_that("ordered", {
 
   ## > Equal length ----
+  lvls <- c(LETTERS[1:10])
+
+  x <- c(A = "A", B = "C", D = "D", E = "A", G = "J")
+  y <- setNames(nm = LETTERS)[c(1:5, 10)]
+  x <- factor(x, levels = lvls, ordered = TRUE)
+  y <- factor(y, levels = lvls, ordered = TRUE)
+
+  exp <- data_frame(target = c("C", NA_character_, "A", "J", NA_character_),
+                    reference = c("B", "C", "E", NA_character_, "J"),
+                    difference = c(1, NA_real_, -4, NA_real_, NA_real_))
+  res <- qc(x, y)
+  expect_equivalent(res, exp)
+
+  a <- attr(res, "difference")
+  b <- c(FALSE, TRUE, TRUE, FALSE, TRUE, TRUE, TRUE)
+  expect_equivalent(res, exp)
+
+  expect_warning(qc(x, y, string_dist = TRUE),
+                 "String distances will not be computed for factors")
+
+  ## Threshold ----
+  # qc(x, y, threshold = 2)
+
+  z <- factor(x, levels = lvls[1:4], ordered = FALSE)
+  exp <- data_frame(target = "J", reference = NA_character_, difference = NA_real_)
+  expect_warning(qc(x, z), "Levels do not match, applying factor method")
+  expect_equivalent(suppressWarnings(qc(x, z)), exp)
+})
+
+# factor ------------------------------------------------------------------
+
+test_that("factor", {
+  ## > Equal length ----
   lvls <- c(LETTERS[1:6])
 
-  x <- setNames(nm = factor(LETTERS[2:4], levels = lvls, ordered = TRUE))
-  y <- setNames(nm = factor(LETTERS[1:6][-2], levels = lvls, ordered = TRUE))
+  x <- setNames(nm = factor(LETTERS[2:4], levels = lvls, ordered = FALSE))
+  y <- setNames(nm = factor(LETTERS[1:6][-2], levels = lvls, ordered = FALSE))
 
   exp <- data_frame(target = c(NA_character_, "B", NA_character_, NA_character_),
                     reference = c("A", NA_character_, "E", "F"),
                     difference = rep(NA_real_, 4))
-  res <- qc(x, y, string_dist = TRUE, ignore_case = TRUE)
+  res <- qc(x, y)
   expect_equivalent(res, exp)
 
   ##  >> attributes ----
@@ -52,18 +85,8 @@ test_that("ordered", {
   b <- c(TRUE, TRUE, FALSE,  FALSE, TRUE, TRUE)
   expect_equal(a, b)
 
-})
-
-# factor ------------------------------------------------------------------
-
-test_that("factor", {
-  target = factor(letters[1:5], letters, ordered = FALSE)
-  reference = factor(c("a", "b", "j", "e", "e"), letters, ordered = FALSE)
-  threshold = 0
-  res <- qc(target, reference, string_dist = FALSE)
-  a <- attr(.Last.value, "string_dist")
-  expect_visible(res)
-  expect_visible(a)
+  expect_warning(qc(x, y, string_dist = TRUE),
+                 "String distances will not be computed for factors")
 })
 
 
@@ -71,7 +94,7 @@ test_that("factor", {
 
 
 test_that("numeric", {
-
+  expect_true(TRUE)
 })
 
 
@@ -99,7 +122,7 @@ test_that("Date", {
 # POSXITct ----------------------------------------------------------------
 
 test_that("POSITct", {
-
+  expect_true(TRUE)
 })
 
 # character ---------------------------------------------------------------
@@ -133,6 +156,11 @@ test_that("character", {
   a <- attr(res, "differences")
   b <- c(a = FALSE, b = TRUE, c = FALSE, d = TRUE)
   expect_equal(a, b)
+
+  ## > No differences ---
+  x <- setNames(nm = letters[1:5])
+  y <- setNames(nm = letters[c(3, 4, 1, 5, 2)])
+  expect_message(qc(x, y), "No differences found")
 
 })
 
