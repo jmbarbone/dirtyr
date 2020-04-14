@@ -60,3 +60,6 @@ keep_nin <- function(df, ...) {
 # x <- c(1, "a", NA, Inf, -Inf, NULL)
 
 
+# globalVariables ---------------------------------------------------------
+
+globalVariables(c("df", "."))
