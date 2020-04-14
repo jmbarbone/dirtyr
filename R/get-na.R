@@ -14,11 +14,13 @@ get_na <- function(.data, vars, ...) {
   UseMethod("get_na", .data)
 }
 
+#' @export
 get_na.data.frame <- function(.data, vars = NULL) {
   if(is.null(vars)) vars <- colnames(.data)
-  .data[!complete.cases(.data[vars]), ]
+  .data[!complete.cases(.data[, vars]), ]
 }
 
+#' @export
 get_na.data.table <- function(.data, vars = NULL) {
   if(is.null(vars)) vars <- colnames(.data)
   .data[!complete.cases(.data[ , vars, with = FALSE])]
@@ -30,6 +32,7 @@ get_na_inf <- function(.data, ...) {
   UseMethod("get_na_inf", .data)
 }
 
+#' @export
 get_na_inf.data.frame <- function(.data, vars = NULL) {
   if(is.null(vars)) vars <- colnames(.data)
   .data[apply(.data[vars], 1, is_na_inf), ]
