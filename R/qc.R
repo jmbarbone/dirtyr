@@ -80,7 +80,8 @@ qc.character <- function(target, reference, string_dist = FALSE, ignore_case = F
     diffs <- rep(NA_real_, ds)
   }
   # qc_df(target, reference, diffs, x)
-  res <- data_frame(target = as.character(target)[d],
+  res <- data_frame(index = if(is_named(target)) names(target)[d] else seq_along(target)[d],
+                    target = as.character(target)[d],
                     reference = as.character(reference)[d],
                     difference = diffs)
   attr(res, "differences") <- d
@@ -89,12 +90,11 @@ qc.character <- function(target, reference, string_dist = FALSE, ignore_case = F
 
 # target = x
 # reference = y
-# threshold = 0
+# threshold = 1L
 # string_dist = FALSE
 
 #' @export
-qc.ordered <- function(target, reference, threshold = 0, ..., string_dist = FALSE) {
-  # lvls <- levels(target)
+qc.ordered <- function(target, reference, threshold = 0L, ..., string_dist = FALSE) {
   if(anyNA(match(levels(target), levels(reference)))) {
     warning("Levels do not match, applying factor method", call. = FALSE)
     return(qc.factor(unordered(target),
@@ -108,7 +108,7 @@ qc.ordered <- function(target, reference, threshold = 0, ..., string_dist = FALS
   qc_name_check(target, reference)
   d <- are_different(target, reference)
   diffs <- as.integer(target) - as.integer(reference)
-  d <- d | diffs > threshold
+  d <- d & !is_false(abs(diffs) > as.integer(threshold))
   res <- qc_df(target, reference, diffs[d], d)
   attr(res, "differences") <- d
   res
@@ -124,16 +124,21 @@ qc.factor <- function(target, reference, string_dist = FALSE, ...) {
 }
 
 #' @export
-qc.numeric <- function(target, reference, threshold = 0, ...) {
-  diffs <- suppress_wm(target - reference)
-  x <- abs(diffs) > threshold | is.na(diffs)
-  res <- data.frame(
-    target = as.character(target[x]),
-    reference = as.character(reference[x]),
-    difference = diffs[x],
-    stringsAsFactors = FALSE
-  )
-  attr(res, "differences") <- x
+qc.numeric <- function(target, reference, threshold = 0.0, ...) {
+  qc_name_check(target, reference)
+
+  d <- are_different(target, reference)
+  diffs <- target - reference
+  d <- d & !is_false(abs(diffs) > threshold)
+
+  res <- qc_df(target, reference, diffs[d], d)
+  # res <- data.frame(
+  #   target = as.character(target[x]),
+  #   reference = as.character(reference[x]),
+  #   difference = diffs[x],
+  #   stringsAsFactors = FALSE
+  # )
+  attr(res, "differences") <- d
   res
 }
 
@@ -196,6 +201,7 @@ qc_name_check <- function(x, y) {
 
 qc_df <- function(target, reference, difference, d) {
   data_frame(
+    index = if(is_named(target)) names(target)[d] else seq_along(target)[d],
     target = as.character(target[d]),
     reference = as.character(reference[d]),
     difference = as.double(difference)

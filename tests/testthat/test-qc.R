@@ -31,11 +31,11 @@ add_empty = TRUE
 # qc(target, reference, "index")
 
 
-# orderered ---------------------------------------------------------------
+# ordered -----------------------------------------------------------------
 
-test_that("ordered", {
+test_that("ordered equal named lengths", {
 
-  ## > Equal length ----
+  ## > Equal length
   lvls <- c(LETTERS[1:10])
 
   x <- c(A = "A", B = "C", D = "D", E = "A", G = "J")
@@ -43,44 +43,54 @@ test_that("ordered", {
   x <- factor(x, levels = lvls, ordered = TRUE)
   y <- factor(y, levels = lvls, ordered = TRUE)
 
-  exp <- data_frame(target = c("C", NA_character_, "A", "J", NA_character_),
+  exp <- data_frame(index = c("B", "C", "E", "G", "J"),
+                    target = c("C", NA_character_, "A", "J", NA_character_),
                     reference = c("B", "C", "E", NA_character_, "J"),
                     difference = c(1, NA_real_, -4, NA_real_, NA_real_))
   res <- qc(x, y)
   expect_equivalent(res, exp)
 
-  a <- attr(res, "difference")
-  b <- c(FALSE, TRUE, TRUE, FALSE, TRUE, TRUE, TRUE)
-  expect_equivalent(res, exp)
+  expect_equivalent(attr(res, "difference"),
+                    c(FALSE, TRUE, TRUE, FALSE, TRUE, TRUE, TRUE))
 
   expect_warning(qc(x, y, string_dist = TRUE),
                  "String distances will not be computed for factors")
 
-  ## Threshold ----
-  # qc(x, y, threshold = 2)
+  ## Threshold
+  exp <- data_frame(index = c("C", "E", "G", "J"),
+                    target = c(NA_character_, "A", "J", NA_character_),
+                    reference = c("C", "E", NA_character_, "J"),
+                    difference = c(NA_real_, -4, NA_real_, NA_real_))
+  res <- qc(x, y, threshold = 2L)
+  expect_equivalent(res, exp)
+
+  expect_identical(attr(res, "difference"),
+                   c(FALSE, FALSE, TRUE, FALSE, TRUE, TRUE, TRUE))
 
   z <- factor(x, levels = lvls[1:4], ordered = FALSE)
-  exp <- data_frame(target = "J", reference = NA_character_, difference = NA_real_)
+  exp <- data_frame(index = "G",
+                    target = "J",
+                    reference = NA_character_,
+                    difference = NA_real_)
   expect_warning(qc(x, z), "Levels do not match, applying factor method")
   expect_equivalent(suppressWarnings(qc(x, z)), exp)
 })
 
 # factor ------------------------------------------------------------------
 
-test_that("factor", {
-  ## > Equal length ----
+test_that("factor equal levels and string warning", {
   lvls <- c(LETTERS[1:6])
 
   x <- setNames(nm = factor(LETTERS[2:4], levels = lvls, ordered = FALSE))
   y <- setNames(nm = factor(LETTERS[1:6][-2], levels = lvls, ordered = FALSE))
 
-  exp <- data_frame(target = c(NA_character_, "B", NA_character_, NA_character_),
+  exp <- data_frame(idnex = c("A", "B", "E", "F"),
+                    target = c(NA_character_, "B", NA_character_, NA_character_),
                     reference = c("A", NA_character_, "E", "F"),
                     difference = rep(NA_real_, 4))
   res <- qc(x, y)
   expect_equivalent(res, exp)
 
-  ##  >> attributes ----
   a <- attr(res, "differences")
   b <- c(TRUE, TRUE, FALSE,  FALSE, TRUE, TRUE)
   expect_equal(a, b)
@@ -94,7 +104,17 @@ test_that("factor", {
 
 
 test_that("numeric", {
-  expect_true(TRUE)
+  x <- c(a = 2.1, b = 1.0, f = 0.2, c = -1.5)
+  y <- c(a = 2.1, b = 1.0, c = 2.7)
+  exp <- data_frame(index = c("c", "f"),
+                    target = as.character(c(-1.5, 0.2)),
+                    reference = c(2.7, NA_character_),
+                    difference = c(-4.2, NA_real_)
+  )
+  res <- qc(x, y)
+  expect_equivalent(res, exp)
+  expect_equal(attr(res, "difference"),
+               c(a = FALSE, b = FALSE, c = TRUE, f = TRUE))
 })
 
 
@@ -129,30 +149,32 @@ test_that("POSITct", {
 
 test_that("character", {
 
-  ## > Equal length ----
+  ## > Equal length
   x <- c("this", "that", "those", "what?")
   y <- c("thas", "THAT", "what are those?", "what")
-  exp <- data_frame(target = x[-2],
+  exp <- data_frame(index = c(1, 3, 4),
+                    target = x[-2],
                     reference = y[-2],
                     difference = c(1, 10, 1))
   res <- qc(x, y, string_dist = TRUE, ignore_case = TRUE)
   expect_equivalent(res, exp)
 
-  ##  >> attributes ----
+  ##  >> attributes
   b <- c(TRUE, FALSE, TRUE, TRUE)
   a <- attr(res, "differences")
   expect_equal(a, b)
 
-  ## > Named vectors ----
+  ## > Named vectors
   x <- c(a = 1, b = 2, c = NA_character_, d = NA_character_)
   y <- c(a = 1, b = 3, c = NA_character_, d = 0)
   res <- qc(x, y)
-  exp <- data_frame(target = c(2, NA_character_),
+  exp <- data_frame(index = c("b", "d"),
+                    target = c(2, NA_character_),
                     reference = c('3', '0'),
                     difference = rep(NA_real_, 2))
   expect_equivalent(res, exp)
 
-  ### > attributes----
+  ### > attributes
   a <- attr(res, "differences")
   b <- c(a = FALSE, b = TRUE, c = FALSE, d = TRUE)
   expect_equal(a, b)
@@ -170,22 +192,23 @@ test_that("character", {
 
 test_that("logical", {
 
-  ## > Equal length ----
+  ## > Equal length
   x <- c(  NA, TRUE,  TRUE, FALSE, NA)
   y <- c(TRUE, TRUE, FALSE, FALSE, NA)
-  exp <- data_frame(target = c(NA_character_, TRUE),
+  exp <- data_frame(index = c(1, 3),
+                    target = c(NA_character_, TRUE),
                     reference = c("TRUE", "FALSE"),
                     difference = c(NA_real_, 1.0))
   res <- qc(x, y)
   expect_equivalent(res, exp)
 
-  ## >> attributes ----
+  ## >> attributes
   a <- attr(res, "differences")
   b <- c(TRUE, FALSE, TRUE, FALSE, FALSE)
   expect_equal(a, b)
 
 
-  ## > All NAs ----
+  ## > All NAs
   ## This will force the evaluation of x according to class(y)
   x <- rep(NA, 5)
   y <- character(5)
