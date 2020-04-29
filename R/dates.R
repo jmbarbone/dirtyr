@@ -97,6 +97,65 @@ extract_date <- function(x, format, possible) {
          latest = latest_date(year = v[1], month = v[2], day = v[3]))
 }
 
+#' Parses dates
+#'
+#' Separates dates from a vector or a data.frame
+#'
+#' @param x A vector or data.frame
+#' @param year Name for year column or column suffix
+#' @param month Name for month column or column suffix
+#' @param day Name for day column or column suffix
+#' @param dates_to_row Logical, if `TRUE`, adds dates to the row nmaes
+#' @param cols A character vector of the columns to parse into dates
+#' @param sep String to use to separate new columns
+#'
+#' @examples
+#' x <- c("2010-01-12", "2020-09-30", "1999-12-31")
+#' split_date(x)
+#'
+#' xx <- data.frame(
+#'   x1 = 1:3,
+#'   x2 = runif(3),
+#'   date1 = as.Date(c("1950-10-05", "2020-04-29", "1992-12-17")),
+#'   x3 = letters[1:3],
+#'   date2 = as.Date(c("2010-01-12", "2020-09-30", "1999-12-31")))
+#' parse_date(xx, c("date1", "date2"))
+#' @export
+split_date <- function(x, year = "year", month = "month", day = "day", dates_to_row = FALSE) {
+  stopifnot(class(x) == "Date")
+  x %>%
+    as.character() %>%
+    sapply(strsplit, split = "-", fixed = TRUE, simplify = TRUE) %>%
+    lapply(as.integer) %>%
+    Reduce(rbind, .) %>%
+    as.data.frame(row.names = if(dates_to_row) x else FALSE,
+                  stringsAsFactors = FALSE) %>%
+    setNames(c(year, month, day))
+}
+
+#' @export
+#' @rdname split_date
+parse_date <- function(x, cols, year = "year", month = "month", day = "day", sep = "_") {
+  stopifnot(is.data.frame(x))
+  for(i in cols) {
+    if(class(x[[i]]) != "Date") {
+      warning("Column `i` is not a Date -- skipped", call. = FALSE)
+      next
+    }
+    cn <- colnames(x)
+    place <- which(cn == i)
+    after <- colnames(x)[-seq(place)]
+    x <- cbind(x[, seq(place), drop = FALSE],
+               split_date(x[[i]],
+                          year = sprintf("%s%s%s", i, sep, year),
+                          month = sprintf("%s%s%s", i, sep, month),
+                          day = sprintf("%s%s%s", i, sep, day),
+                          dates_to_row = FALSE),
+               x[, after, drop = FALSE])
+  }
+  x
+}
+
 
 # Utils -------------------------------------------------------------------
 
