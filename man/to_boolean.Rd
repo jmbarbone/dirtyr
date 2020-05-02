@@ -4,26 +4,45 @@
 \alias{to_boolean}
 \title{To boolean}
 \usage{
-to_boolean(x, true, false = NULL, names = FALSE)
+to_boolean(x, true = NULL, false = NULL, na = NULL, names = FALSE)
 }
 \arguments{
 \item{x}{A non-boolean vector}
 
 \item{true}{A condition in which to evaluate as TRUE}
 
-\item{false}{An optional condition to evlauate as FALSE}
+\item{false}{An optional condition to evaluate as FALSE}
+
+\item{na}{An optional condition to evaluate as NA.  If `na` is set,
+so must either `true` or `false`.}
 
 \item{names}{Logical.  If TRUE, the result will print out with a name}
 }
 \description{
 Conditionally transforms a non-boolean vector into a boolean vector
 }
+\details{
+If the `class()` of `true`, `false`, or `na` is `function`, the function will
+  be applied to the vector `x` and when evaluated as `TRUE` will return the
+  respective value of the argument.
+A warning will appear when `true`, `false`, and `na` are all set together.
+Only two should be set at a time as any value that has not been matched
+  will default to the unused argument.
+}
 \examples{
 x <- c("Y", "Y", "N", "Y", "N", "N/A", "Y - not sure", "YN", "YY")
 to_boolean(x, "Y")
+to_boolean(x, "Y", names = TRUE)
 to_boolean(x, "Y", "N", names = TRUE)
+to_boolean(x,
+           true = function(x) grepl("^Y", x),
+           na = "N/A",
+           names = TRUE)
+
+x <- sample(c("Yes", "Maybe", "No", "??"), 10, TRUE)
+to_boolean(x, c("Yes", "Maybe"), "No", names = TRUE)
 
 x <- c(1, 2, 3, 4)
 to_boolean(x, 1, 2)
-to_boolean(x, "<= 1", ">= 2", names = TRUE)
+to_boolean(x, "<= 1", ">= 3")
 }

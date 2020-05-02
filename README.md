@@ -58,6 +58,42 @@ reindex(x, new_index = new_index, keep_empty = TRUE)
 #> NA  3  5 NA
 ```
 
+## To boolean
+
+`to_boolean()` presents a simplified method of recoding vectors as
+logical values. This function is flexible enough to take strict
+requirements for the true/false values or a simple operation.
+
+``` r
+x <- c("Y", "Y", "N", "N", "N/A", "Y - not sure", "YN", "YY")
+to_boolean(x, "Y", names= TRUE)
+#>            Y            Y            N            N          N/A Y - not sure 
+#>         TRUE         TRUE        FALSE        FALSE        FALSE        FALSE 
+#>           YN           YY 
+#>        FALSE        FALSE
+y <- c(1, 2, 3, 4)
+to_boolean(y, 1, 2)
+#> [1]  TRUE FALSE    NA    NA
+to_boolean(y, "<= 1", 2)
+#> [1]  TRUE FALSE    NA    NA
+
+tibble::tibble(x = x,
+               y = rep(y, 2)) %>% 
+  dplyr::mutate(xb = to_boolean(x, c("Y", "Y - not sure"), na = "N/A"),
+                yb = to_boolean(y, "<= 1", ">= 3"))
+#> # A tibble: 8 x 4
+#>   x                y xb    yb   
+#>   <chr>        <dbl> <lgl> <lgl>
+#> 1 Y                1 TRUE  TRUE 
+#> 2 Y                2 TRUE  NA   
+#> 3 N                3 FALSE FALSE
+#> 4 N                4 FALSE FALSE
+#> 5 N/A              1 NA    TRUE 
+#> 6 Y - not sure     2 TRUE  NA   
+#> 7 YN               3 FALSE FALSE
+#> 8 YY               4 FALSE FALSE
+```
+
 ## QC
 
 ``` r

@@ -20,7 +20,8 @@ Imports:
     purrr,
     rlang,
     tibble,
-    utils
+    utils,
+    R6
 Suggests: 
     stringdist,
     testthat
