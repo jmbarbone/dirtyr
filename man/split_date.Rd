@@ -13,7 +13,15 @@ split_date(
   dates_to_row = FALSE
 )
 
-parse_date(x, cols, year = "year", month = "month", day = "day", sep = "_")
+parse_date(
+  x,
+  cols,
+  year = "year",
+  month = "month",
+  day = "day",
+  sep = "_",
+  keep = FALSE
+)
 }
 \arguments{
 \item{x}{A vector or data.frame}
@@ -24,18 +32,20 @@ parse_date(x, cols, year = "year", month = "month", day = "day", sep = "_")
 
 \item{day}{Name for day column or column suffix}
 
-\item{dates_to_row}{Logical, if `TRUE`, adds dates to the row nmaes}
+\item{dates_to_row}{Logical, if `TRUE`, adds dates to the row names}
 
 \item{cols}{A character vector of the columns to parse into dates}
 
 \item{sep}{String to use to separate new columns}
+
+\item{keep}{Logical, if `TRUE` the original date column is kept}
 }
 \description{
 Separates dates from a vector or a data.frame
 }
 \examples{
 x <- c("2010-01-12", "2020-09-30", "1999-12-31")
-split_date(x)
+split_date(as.Date(x))
 
 xx <- data.frame(
   x1 = 1:3,

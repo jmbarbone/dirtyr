@@ -41,12 +41,32 @@ Not every system will provide easily accessible dates.
 Systems may allow for ambiguous dates to be recorded alongside exact dates.
 `unknown_date()` creates a date object out of the ambiguity and provides either the earliest or latest possible dates.
 
-```{r example date}
+```{r example date unknown}
 x <- c("UN Feb 2000", "1958", "17 UNK 1992")
 
 unknown_date(x, format = "dmy")
 
 unknown_date(x, format = "dmy", possible = "latest")
+```
+
+We can also split dates apart when we need to:
+
+```{r example date split}
+x <- c("2010-01-12", "2020-09-30", "1999-12-31")
+split_date(as.Date(x))
+```
+
+Or even parse a column inside a data frame;
+
+```{r example date parse}
+xx <- data.frame(
+  x1 = 1:3,
+  x2 = runif(3),
+  date1 = as.Date(c("1950-10-05", "2020-04-29", "1992-12-17")),
+  x3 = letters[1:3],
+  date2 = as.Date(c("2010-01-12", "2020-09-30", "1999-12-31")))
+
+parse_date(xx, c("date1", "date2"))
 ```
 
 ## Reindex
@@ -70,8 +90,10 @@ This function is flexible enough to take strict requirements for the true/false 
 ```{r example to_boolean}
 x <- c("Y", "Y", "N", "N", "N/A", "Y - not sure", "YN", "YY")
 to_boolean(x, "Y", names= TRUE)
+
 y <- c(1, 2, 3, 4)
 to_boolean(y, 1, 2)
+
 to_boolean(y, "<= 1", 2)
 
 tibble::tibble(x = x,

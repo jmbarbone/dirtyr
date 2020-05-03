@@ -31,10 +31,14 @@ Incomplete dates cannot be directly coerced into date values in R.
 These functions help
 }
 \details{
-`unknown_date` is a vectorized function which implements the non-vectorized `earliest_date` and `latest_date`.
-If a split vector of 2 is passed to `unkown_date`, it is assumed that the vector consists of the Month and Year.
-If a split vector of 1 is passed to `uknown_date`, it is assumed that the vector consists only of the Year.
-For cases in which the year is not provided or the month is unknown, it is suggested that these be recoded before using this function.
+`unknown_date` is a vectorized function which implements the non-vectorized
+  `earliest_date` and `latest_date`.
+If a split vector of 2 is passed to `unknown_date`, it is assumed that the
+  vector consists of the Month and Year.
+If a split vector of 1 is passed to `unknown_date`, it is assumed that the
+  vector consists only of the Year.
+For cases in which the year is not provided or the month is unknown, it is
+  suggested that these be recoded before using this function.
 }
 \examples{
 earliest_date(2019, 1, 0)

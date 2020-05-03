@@ -41,6 +41,38 @@ unknown_date(x, format = "dmy", possible = "latest")
 #> [1] "2000-02-29" "1958-12-31" "1992-12-17"
 ```
 
+We can also split dates apart when we need to:
+
+``` r
+x <- c("2010-01-12", "2020-09-30", "1999-12-31")
+split_date(as.Date(x))
+#>   year month day
+#> 1 2010     1  12
+#> 2 2020     9  30
+#> 3 1999    12  31
+```
+
+Or even parse a column inside a data frame;
+
+``` r
+xx <- data.frame(
+  x1 = 1:3,
+  x2 = runif(3),
+  date1 = as.Date(c("1950-10-05", "2020-04-29", "1992-12-17")),
+  x3 = letters[1:3],
+  date2 = as.Date(c("2010-01-12", "2020-09-30", "1999-12-31")))
+
+parse_date(xx, c("date1", "date2"))
+#>   x1        x2      date1 date1_year date1_month date1_day x3      date2
+#> 1  1 0.5585511 1950-10-05       1950          10         5  a 2010-01-12
+#> 2  2 0.3621280 2020-04-29       2020           4        29  b 2020-09-30
+#> 3  3 0.4652415 1992-12-17       1992          12        17  c 1999-12-31
+#>   date2_year date2_month date2_day
+#> 1       2010           1        12
+#> 2       2020           9        30
+#> 3       1999          12        31
+```
+
 ## Reindex
 
 ``` r
@@ -71,9 +103,11 @@ to_boolean(x, "Y", names= TRUE)
 #>         TRUE         TRUE        FALSE        FALSE        FALSE        FALSE 
 #>           YN           YY 
 #>        FALSE        FALSE
+
 y <- c(1, 2, 3, 4)
 to_boolean(y, 1, 2)
 #> [1]  TRUE FALSE    NA    NA
+
 to_boolean(y, "<= 1", 2)
 #> [1]  TRUE FALSE    NA    NA
 

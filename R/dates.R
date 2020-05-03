@@ -4,10 +4,14 @@
 #' These functions help
 #'
 #' @details
-#' `unknown_date` is a vectorized function which implements the non-vectorized `earliest_date` and `latest_date`.
-#' If a split vector of 2 is passed to `unkown_date`, it is assumed that the vector consists of the Month and Year.
-#' If a split vector of 1 is passed to `uknown_date`, it is assumed that the vector consists only of the Year.
-#' For cases in which the year is not provided or the month is unknown, it is suggested that these be recoded before using this function.
+#' `unknown_date` is a vectorized function which implements the non-vectorized
+#'   `earliest_date` and `latest_date`.
+#' If a split vector of 2 is passed to `unknown_date`, it is assumed that the
+#'   vector consists of the Month and Year.
+#' If a split vector of 1 is passed to `unknown_date`, it is assumed that the
+#'   vector consists only of the Year.
+#' For cases in which the year is not provided or the month is unknown, it is
+#'   suggested that these be recoded before using this function.
 #'
 #' @param year Year
 #' @param month Month
@@ -105,13 +109,14 @@ extract_date <- function(x, format, possible) {
 #' @param year Name for year column or column suffix
 #' @param month Name for month column or column suffix
 #' @param day Name for day column or column suffix
-#' @param dates_to_row Logical, if `TRUE`, adds dates to the row nmaes
+#' @param dates_to_row Logical, if `TRUE`, adds dates to the row names
 #' @param cols A character vector of the columns to parse into dates
 #' @param sep String to use to separate new columns
+#' @param keep Logical, if `TRUE` the original date column is kept
 #'
 #' @examples
 #' x <- c("2010-01-12", "2020-09-30", "1999-12-31")
-#' split_date(x)
+#' split_date(as.Date(x))
 #'
 #' xx <- data.frame(
 #'   x1 = 1:3,
@@ -121,7 +126,8 @@ extract_date <- function(x, format, possible) {
 #'   date2 = as.Date(c("2010-01-12", "2020-09-30", "1999-12-31")))
 #' parse_date(xx, c("date1", "date2"))
 #' @export
-split_date <- function(x, year = "year", month = "month", day = "day", dates_to_row = FALSE) {
+split_date <- function(x, year = "year", month = "month", day = "day",
+                       dates_to_row = FALSE) {
   stopifnot(class(x) == "Date")
   x %>%
     as.character() %>%
@@ -135,16 +141,17 @@ split_date <- function(x, year = "year", month = "month", day = "day", dates_to_
 
 #' @export
 #' @rdname split_date
-parse_date <- function(x, cols, year = "year", month = "month", day = "day", sep = "_") {
-  stopifnot(is.data.frame(x))
+parse_date <- function(x, cols, year = "year", month = "month", day = "day",
+                       sep = "_", keep = FALSE) {
+  stopifnot(is.data.frame(x) && all(cols %in% colnames(x)))
   for(i in cols) {
     if(class(x[[i]]) != "Date") {
       warning("Column `i` is not a Date -- skipped", call. = FALSE)
       next
     }
     cn <- colnames(x)
-    place <- which(cn == i)
-    after <- colnames(x)[-seq(place)]
+    place <- which(cn == i) - !keep
+    after <- colnames(x)[-seq(place + !keep)]
     x <- cbind(x[, seq(place), drop = FALSE],
                split_date(x[[i]],
                           year = sprintf("%s%s%s", i, sep, year),
@@ -159,11 +166,11 @@ parse_date <- function(x, cols, year = "year", month = "month", day = "day", sep
 
 # Utils -------------------------------------------------------------------
 
-days_in_month <- c(31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31)
-names(days_in_month) <- month.abb
+days_in_month <- stats::setNames(
+  c(31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31),
+  month.abb)
 
 is_leap <- function(year = NULL) {
-  # if(is.null(year)) return(FALSE)
   if(year %% 4 != 0) {
     FALSE
   } else if (year %% 100 != 0) {
