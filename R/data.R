@@ -40,3 +40,34 @@
 #' \item{infinity}{infinity values}
 #' }
 "na_data"
+
+#' Test data set for QC (reference)
+#'
+#' A test data set for QC - reference set
+#'
+#' @format A data frame with x rows and y variables
+#' \describe{
+#' \item{index}{index values}
+#' \item{character}{character values}
+#' \item{factor}{factor values}
+#' \item{ordered}{ordered values}
+#' \item{integer}{integer values}
+#' \item{double}{double values}
+#' \item{empty}{empty, character values}
+#' }
+"test_data_reference"
+
+#' Test data set for QC (target)
+#'
+#' A test data set for QC - target set
+#'
+#' @format A data frame with x rows and y variables
+#' \describe{
+#' \item{index}{index values}
+#' \item{character}{character values}
+#' \item{factor}{factor values}
+#' \item{ordered}{ordered values}
+#' \item{integer}{integer values}
+#' \item{double}{double values}
+#' }
+"test_data_target"
