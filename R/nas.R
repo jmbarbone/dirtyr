@@ -113,15 +113,15 @@ get_na <- function(.data, vars, ...) {
 }
 
 #' @export
-get_na.data.frame <- function(.data, vars = NULL) {
+get_na.data.frame <- function(.data, vars = NULL, ...) {
   if(is.null(vars)) vars <- colnames(.data)
   .data[!complete.cases(.data[, vars]), ]
 }
 
 #' @export
-get_na.data.table <- function(.data, vars = NULL) {
+get_na.data.table <- function(.data, vars = NULL, ...) {
   if(is.null(vars)) vars <- colnames(.data)
-  .data[!complete.cases(.data[ , vars, with = FALSE])]
+  .data[!complete.cases(.data[, vars, with = FALSE])]
 }
 
 #' @export
@@ -131,9 +131,9 @@ get_na_inf <- function(.data, ...) {
 }
 
 #' @export
-get_na_inf.data.frame <- function(.data, vars = NULL) {
+get_na_inf.data.frame <- function(.data, vars = NULL, ...) {
   if(is.null(vars)) vars <- colnames(.data)
-  .data[apply(.data[vars], 1, is_na_inf), ]
+  .data[apply(.data[, vars], 1, is_na_inf), ]
 }
 
 #' Filter for missing data

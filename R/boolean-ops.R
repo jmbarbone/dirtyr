@@ -1,23 +1,27 @@
 #' Boolean Operators
 #'
-#' These provide better logical operators for catching TRUE and FALSE statements in the presence of
-#' `NA` values.
-#' These return `NA` values as `FALSE` and thus no `na.rm` argument is not necessary.
+#' These provide better logical operators for catching TRUE and FALSE statements
+#'   in the presence of `NA` values.
+#' These return `NA` values as `FALSE` and thus no `na.rm` argument is not
+#'   necessary.
 #'
 #' @details
-#' The functions [is_true()] and [is_false()] are vectorized and will return a logical vector of the
-#'   same length as the input `x` denoting whether or not the values are `TRUE` or `FALSE`,
-#'   respectively.
-#' The `all_*()` and `any_*()` functions apply the vectorized functions and return values of `TRUE`
-#'   or `FALSE`.
+#' The functions [is_true()] and [is_false()] are vectorized and will return a
+#'   logical vector of the same length as the input `x` denoting whether or not
+#'   the values are `TRUE` or `FALSE`, respectively.
+#' The `all_*()` and `any_*()` functions apply the vectorized functions and
+#'   return values of `TRUE` or `FALSE`.
 #'
 #' Specialized `any_*_x()` and `all_*_x()` apply exclusivity to the evaluations.
-#' These will return `NA` is all the values are `NA` to designate an incompatibility of values.
-#' This is useful for when you do not want to apply an evaluation in the _absence_ of data.
+#' These will return `NA` is all the values are `NA` to designate an
+#'   incompatibility of values.
+#' This is useful for when you do not want to apply an evaluation in the
+#'   _absence_ of data.
 #'
 #' @param x A vector of logical values
 #' @param ... Additional arguments sent to methods (not used)
-#' @returns Either a vector of logical values or a single logical values (see details).
+#' @returns Either a vector of logical values or a single logical values
+#'   (see details).
 #'
 #' @name boolean_ops
 #'
