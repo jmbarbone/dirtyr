@@ -21,7 +21,7 @@ data_frame <- function(..., row.names = NULL, check.rows = !is.null(row.names)) 
 # )
 
 if_then <- function(x, FUN, y) {
-  if(FUN(x)) y else x
+  if (FUN(x)) y else x
 }
 
 is_named <- function(x) {
@@ -40,16 +40,12 @@ suppress_wm <- function(x) {
 }
 
 short_class <- function(x) {
-  cl <- class(x)
-  if("ordered" %in% cl) {
-    "ordered"
-  } else if(cl == "integer") {
-    "numeric"
-  } else if("factor" %in% cl) {
-    "text"
-  } else {
-    cl
-  }
+  cl <- class(x)[1]
+  switch(cl,
+         ordered = "ordered",
+         integer = "numeric",
+         factor = "text",
+         cl)
 }
 
 ## this is just, as.numeric(f) isn't it?
