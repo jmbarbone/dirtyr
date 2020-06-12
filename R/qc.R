@@ -154,7 +154,7 @@ qc.Date <- function(target, reference, threshold = 0, ...) {
 
 #' @export
 qc.POSIXct <- function(target, reference, threshold = 0, ...) {
-  qc.numeric(target, reference, threshold = threshold)
+  qc.numeric(as.numeric(target), as.numeric(reference), threshold = threshold)
 }
 
 
