@@ -18,7 +18,7 @@
 #'
 #' @export
 
-qc_data_frame <- function(target, reference, index, keep_all = FALSE, ...) {
+qc_data_frame <- function(target, reference, index, keep_all = FALSE, ..., .use_tibble = TRUE) {
   if(!is_named(index)) names(index) <- index
 
   reind_tar <- reindex(target, names(index), reference[[index]], keep_all = keep_all)
@@ -36,13 +36,23 @@ qc_data_frame <- function(target, reference, index, keep_all = FALSE, ...) {
         vc = vc)
     }))
   # as_tibble(res[order(res[[index]]), ])
-  as_tibble(res)
+  if(.use_tibble) {
+    as_tibble(res)
+  } else {
+    res
+  }
 }
 
 # implementation of qc for each column
 qc_col_implement <- function(tar, ref, ind, vc) {
   temp <- qc(tar, ref)
-  if(is.null(temp) || nrow(temp) == 0) return(NULL)
+
+  if (is.null(temp)) {
+    return(NULL)
+  } else if (nrow(temp) == 0) {
+    return(NULL)
+  }
+
   diff_attr <- attr(temp, "differences")
   cbind(data_frame(index = ind[diff_attr | is.na(diff_attr)],
                    comparison = rep(vc, nrow(temp))),

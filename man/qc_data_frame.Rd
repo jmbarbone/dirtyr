@@ -4,7 +4,14 @@
 \alias{qc_data_frame}
 \title{"QC" data frames}
 \usage{
-qc_data_frame(target, reference, index, keep_all = FALSE, ...)
+qc_data_frame(
+  target,
+  reference,
+  index,
+  keep_all = FALSE,
+  ...,
+  .use_tibble = TRUE
+)
 }
 \arguments{
 \item{target}{Targer (test) table}
