@@ -23,6 +23,8 @@ qc_data_frame(
 \item{keep_all}{Logical, passed to `reindex()` (see details)}
 
 \item{...}{additional arguments passed to [stringdist::stringdist]}
+
+\item{.use_tibble}{Logical, if `TRUE`}
 }
 \value{
 A data.frame with the index values and differences in target and comparisons.

@@ -11,6 +11,7 @@
 #' @param reference Reference table
 #' @param index The name or the index
 #' @param keep_all Logical, passed to `reindex()` (see details)
+#' @param .use_tibble Logical, if `TRUE`
 #' @param ... additional arguments passed to [stringdist::stringdist]
 #'
 #' @return
@@ -37,7 +38,7 @@ qc_data_frame <- function(target, reference, index, keep_all = FALSE, ..., .use_
     }))
   # as_tibble(res[order(res[[index]]), ])
   if(.use_tibble) {
-    as_tibble(res)
+    tibble::as_tibble(res)
   } else {
     res
   }
@@ -54,7 +55,7 @@ qc_col_implement <- function(tar, ref, ind, vc) {
   }
 
   diff_attr <- attr(temp, "differences")
-  cbind(data_frame(index = ind[diff_attr | is.na(diff_attr)],
+  cbind(data_frame(row_number = ind[diff_attr | is.na(diff_attr)],
                    comparison = rep(vc, nrow(temp))),
         temp)
 }
