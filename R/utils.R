@@ -112,3 +112,10 @@ r_bind_fun <-  function(x, y) {
 r_bind <- function(ls) {
   Reduce(r_bind_fun, ls)
 }
+
+unique_name_check <- function(x) {
+  if (is_named(x)) {
+    x <- names(x)
+  }
+  all(unique(x) == x)
+}

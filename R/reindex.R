@@ -88,15 +88,5 @@ reindex.data.frame <- function(x, index , new_index, keep_all = FALSE, ...) {
                     stringsAsFactors = FALSE,
                     optional = TRUE)[cnt]))
   }
-  as_tibble(temp)
-}
-
-
-# utils -------------------------------------------------------------------
-
-unique_name_check <- function(x) {
-  if(is_named(x)) {
-    x <- names(x)
-  }
-  all(unique(x) == x)
+  temp
 }
