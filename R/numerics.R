@@ -67,19 +67,16 @@ maybe_numeric <- function(x, names = FALSE) {
 
 #' @export
 maybe_numeric.default <- function(x, names = FALSE) {
-  vapply(
-    x,
-    function(x) !is.na(suppressWarnings(as.double(x))),
-    logical(1),
-    USE.NAMES = names)
+  vapply(x,
+         function(x) !is.na(suppressWarnings(as.double(x))),
+         logical(1), USE.NAMES = names)
 }
 
 #' @export
 maybe_numeric.factor <- function(x, names = FALSE) {
-  res <- vapply(
-    x,
-    function(x) !is.na(suppressWarnings(as.double(levels(x))[x])),
-    logical(1))
+  res <- vapply(x,
+                function(x) !is.na(suppressWarnings(as.double(levels(x))[x])),
+                logical(1), USE.NAMES = )
   if(names) names(res) <- as.character(x)
   res
 }
@@ -92,38 +89,29 @@ maybe_integer <- function(x, names = FALSE) {
 
 #' @export
 maybe_integer.default <- function(x, names = FALSE) {
-  vapply(
-    x,
-    function(x) identical(x, round(x)),
-    logical(1),
-    USE.NAMES = names)
+  vapply(x, function(x) identical(x, round(x)),
+         logical(1), USE.NAMES = names)
 }
 
 #' @export
 maybe_integer.integer <- function(x, names = FALSE){
-  res <- !logical(length(x))
+  res <- !length(x)
   if(names) names(res) <- x
   res
 }
 
 #' @export
 maybe_integer.character <- function(x, names = FALSE) {
-  vapply(
-    x,
-    function(x) {
-      suppressWarnings(identical(as.double(x), round(as.double(x))))
-    },
-    logical(1),
-    USE.NAMES = names)
+  vapply(x,
+         function(x) {
+           suppressWarnings(identical(as.double(x), round(as.double(x))))
+         }, logical(1), USE.NAMES = names)
 }
 
 #' @export
 maybe_integer.factor <- function(x, names = FALSE) {
-  vapply(
-    levels(x),
-    function(x) {
-      suppressWarnings(identical(as.double(x), round(as.double(x))))
-    },
-    logical(1),
-    USE.NAMES = names)
+  vapply(levels(x),
+         function(x) {
+           suppressWarnings(identical(as.double(x), round(as.double(x))))
+         }, logical(1), USE.NAMES = names)
 }
