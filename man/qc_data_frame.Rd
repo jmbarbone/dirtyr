@@ -4,7 +4,14 @@
 \alias{qc_data_frame}
 \title{"QC" data frames}
 \usage{
-qc_data_frame(target, reference, index, keep_all = FALSE, ...)
+qc_data_frame(
+  target,
+  reference,
+  index,
+  keep_all = FALSE,
+  ...,
+  .use_tibble = TRUE
+)
 }
 \arguments{
 \item{target}{Targer (test) table}
@@ -16,6 +23,8 @@ qc_data_frame(target, reference, index, keep_all = FALSE, ...)
 \item{keep_all}{Logical, passed to `reindex()` (see details)}
 
 \item{...}{additional arguments passed to [stringdist::stringdist]}
+
+\item{.use_tibble}{Logical, if `TRUE`}
 }
 \value{
 A data.frame with the index values and differences in target and comparisons.

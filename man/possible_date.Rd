@@ -61,4 +61,6 @@ unknown_date(x, format = "dmy", possible = "l")
 
 unknown_date(c("01 JAN 1996", "Feb 2010", "2019"), "dmy")
 unknown_date(c("01 JAN 1996", "Feb 2016"), "dmy", "latest")
+unknown_date("2015", possible = "e")
+unknown_date("2015", possible = "l")
 }
