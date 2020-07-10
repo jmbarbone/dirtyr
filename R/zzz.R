@@ -7,7 +7,7 @@
 }
 
 .onAttach <- function(libname, pkgname) {
-  # packageStartupMessage(
-  #   "Reminder: Check 'github.com/jmbarbone/dirtyr' for updates."
-  #   )
+  if (is.null(getOption("dirtyr.tz"))) {
+    options(dirtyr.tz = Sys.timezone())
+  }
 }
