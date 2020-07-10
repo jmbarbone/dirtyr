@@ -48,12 +48,12 @@ reindex <- function(x, index, new_index, keep_all = FALSE, ...) {
 
 #' @export
 reindex.default <- function(x, index, new_index, keep_all = FALSE, ...) {
-  if(missing(new_index)) new_index <- index
+  if (missing(new_index)) new_index <- index
   stopifnot(is_named(x))
-  if(!is_named(new_index)) new_index <- setNames(nm = new_index)
+  if (!is_named(new_index)) new_index <- setNames(nm = new_index)
   stopifnot(unique_name_check(x) & unique_name_check(new_index))
 
-  if(keep_all) {
+  if (keep_all) {
     n <- sort(unique(c(names(x), names(new_index))))
     return(setNames(x[n], n))
   }
@@ -67,7 +67,7 @@ reindex.default <- function(x, index, new_index, keep_all = FALSE, ...) {
 # keep_all = TRUE
 
 #' @export
-reindex.data.frame <- function(x, index , new_index, keep_all = FALSE, ...) {
+reindex.data.frame <- function(x, index, new_index, keep_all = FALSE, ...) {
   xi <- x[[index]]
   stopifnot(unique_name_check(xi), unique_name_check(new_index))
   cn <- colnames(x)
@@ -75,20 +75,25 @@ reindex.data.frame <- function(x, index , new_index, keep_all = FALSE, ...) {
   m <- match(new_index, xi)
   temp <- x[remove_na(m), ]
 
-  if(keep_all) {
+  if (keep_all) {
     nas <- is.na(m)
-    if(none(nas)) return(temp)
+    if (none(nas)) {
+      return(temp)
+    }
     ls <- lapply(x[cn[cn != index]], class_na)
     ls[[index]] <- unique(c(xi %wo% new_index, c(new_index[which(nas)])))
-    new_df <- as.data.frame(ls, stringsAsFactors = FALSE)
     cnt <- colnames(temp)
-    temp <- r_bind(list(
-      temp,
-      as.data.frame(ls,
-                    stringsAsFactors = FALSE,
-                    optional = TRUE)[cnt]))
+    new_df <- as.data.frame(ls, stringsAsFactors = FALSE)[cnt]
+    temp <- r_bind(list(temp, new_df))
+    indexes <- unique(c(xi, new_index))
+    temp <- temp[match(indexes, temp[["index"]]), ]
+    rownames(temp) <- seq(length(indexes))
   }
-  as_tibble(temp)
+  if (getOption("dirtyr.tibble", FALSE)) {
+    tibble::as_tibble(temp)
+  } else {
+    temp
+  }
 }
 
 

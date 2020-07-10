@@ -43,5 +43,7 @@ test_that("index.data.frame", {
 
 
   expect_equal(reindex(a, "index", b$index), res1)
-  expect_equal(reindex(a, "index", b$index, keep_all = TRUE), res2)
+  aa <- reindex(a, "index", b$index, keep_all = TRUE)
+
+  expect_identical(reindex(a, "index", b$index, keep_all = TRUE), res2)
 })
