@@ -2,29 +2,37 @@
 % Please edit documentation in R/dates.R
 \name{possible_date}
 \alias{possible_date}
+\alias{unknown_date}
 \alias{earliest_date}
 \alias{latest_date}
-\alias{unknown_date}
 \title{Inexact dates}
 \usage{
+unknown_date(
+  x,
+  format = "ymd",
+  possible = c("earliest", "latest"),
+  invalid_date_string = "^UNK?|NA$"
+)
+
 earliest_date(year, month = NULL, day = NULL)
 
 latest_date(year, month = NULL, day = NULL)
-
-unknown_date(x, format = "ymd", possible = c("earliest", "latest"))
 }
 \arguments{
-\item{year}{Year}
-
-\item{month}{Month}
-
-\item{day}{Day}
-
 \item{x}{a date "string" (see details)}
 
 \item{format}{A date "format" (see details)}
 
 \item{possible}{Whether to look at earliest or latest}
+
+\item{invalid_date_string}{A string (passed as a regular expression; case insensitive)
+to be removed from `x`}
+
+\item{year}{Year}
+
+\item{month}{Month}
+
+\item{day}{Day}
 }
 \description{
 Incomplete dates cannot be directly coerced into date values in R.
@@ -55,7 +63,8 @@ latest_date(2019, 2)
 latest_date(2016, 2)
 
 x <- "UN UNK 2019"
-unknown_date(x)
+unknown_date(x) # NA_date_
+
 unknown_date(x, format = "dmy")
 unknown_date(x, format = "dmy", possible = "l")
 

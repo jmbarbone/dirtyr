@@ -3,7 +3,7 @@
 \name{split_date}
 \alias{split_date}
 \alias{parse_date}
-\title{Parses dates}
+\title{Splits/parses dates}
 \usage{
 split_date(
   x,
