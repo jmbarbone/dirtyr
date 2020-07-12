@@ -43,3 +43,10 @@ test_that("Bad date: Latest", {
   expected <- as.Date(c("2019-12-03", "2004-06-30", "2000-02-29", "2100-02-28"))
   expect_equal(res, expected)
 })
+
+test_that("'Empty' dates don't cause errors", {
+  expect_error(unknown_date(""), NA)
+  expect_error(unknown_date("    "), NA)
+  expect_error(unknown_date("."), NA)
+  expect_error(unknown_date("?.."), NA)
+})

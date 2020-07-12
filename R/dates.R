@@ -72,7 +72,7 @@ unknown_date <- function(x, format = "ymd", possible = c("earliest", "latest"), 
 
 
 extract_date <- function(x, form = NULL, possible, invalid_date_string = invalid_date_string, format) {
-  if (is.na(x)) {
+  if (is.na(x) | gsub("[[:space:]]+|[[:punct:]]+", "", x) == "") {
     return(NA_date_)
   }
 
