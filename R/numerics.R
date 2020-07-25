@@ -37,7 +37,7 @@ to_numeric <- function(x, int = TRUE) {
 
 #' @export
 to_numeric.default <- function(x, int = TRUE) {
-  if(int & all(maybe_integer(x))) {
+  if (int & all(maybe_integer(x))) {
     as.integer(x)
   } else {
     suppressWarnings(as.double(x))
@@ -46,7 +46,7 @@ to_numeric.default <- function(x, int = TRUE) {
 
 #' @export
 to_numeric.factor <- function(x, int = TRUE) {
-  if(int & all(maybe_integer(x))) {
+  if (int & all(maybe_integer(x))) {
     as.integer(levels(x))[x]
   } else {
     suppressWarnings(as.double(levels(x))[x])

@@ -2,15 +2,12 @@
 % Please edit documentation in R/no-match.R
 \name{\%out\%}
 \alias{\%out\%}
-\alias{\%w/o\%}
 \alias{\%wo\%}
 \alias{\%wi\%}
 \alias{no_match}
-\title{Non matching alternatives and supplementary functions.  Contrast with [base::match()].}
+\title{Value Non-matching}
 \usage{
 x \%out\% table
-
-x \%w/o\% table
 
 x \%wo\% table
 
@@ -26,7 +23,8 @@ no_match(x, table)
     \link[base]{Long vectors} are not supported.}
 }
 \description{
-Non matching alternatives and supplementary functions.  Contrast with [base::match()].
+Non matching alternatives and supplementary functions.
+  Contrast with [base::match()], [base::intersect()], and [base::`%in%`()]
 }
 \examples{
 1:10 \%in\% c(1,3,5,9)

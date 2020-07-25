@@ -70,9 +70,9 @@ all_na.default <- function(x) {
 
 all_na.character <- function(x, convert = FALSE) {
   found <- which(x == "NaN")
-  if(convert) {
+  if (convert) {
     x[found] <- NA_character_
-  } else if(length(found) > 0) {
+  } else if (length(found) > 0) {
     warning("These values may be NA types `convert`ed to character:\n",
             paste(paste0("    ",  x[found]), collapse = "\n"),
             call. = FALSE)
@@ -119,3 +119,4 @@ unique_name_check <- function(x) {
   }
   all(unique(x) == x)
 }
+
