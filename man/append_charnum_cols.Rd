@@ -12,8 +12,8 @@ append_charnum_cols(x, cols, old = "_c", new = "_n", beside = TRUE)
 \item{cols}{A vector of column names to be transformed from character to
 numeric.}
 
-\item{old, }{A suffix added to the old/new columns; NULL will not change name;
-these cannot be the same}
+\item{old, new}{A suffix added to the old/new columns; NULL will not change
+name; these cannot be the same}
 
 \item{beside}{Logical, if TRUE will add new columns beside old; otherwise
 will move to the end.}

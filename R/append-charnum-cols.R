@@ -5,10 +5,11 @@
 #' @param x A data.frame
 #' @param cols A vector of column names to be transformed from character to
 #'   numeric.
-#' @param old, A suffix added to the old/new columns; NULL will not change name;
-#'   these cannot be the same
+#' @param old,new A suffix added to the old/new columns; NULL will not change
+#'   name; these cannot be the same
 #' @param beside Logical, if TRUE will add new columns beside old; otherwise
 #'   will move to the end.
+#' @export
 
 append_charnum_cols <- function(x, cols, old = "_c", new = "_n", beside = TRUE) {
   stopifnot(inherits(x, "data.frame"),

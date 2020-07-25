@@ -5,7 +5,7 @@
 \alias{\%wo\%}
 \alias{\%wi\%}
 \alias{no_match}
-\title{Value Non-matching}
+\title{Additional value matching}
 \usage{
 x \%out\% table
 
@@ -29,10 +29,14 @@ Non matching alternatives and supplementary functions.
 \examples{
 1:10 \%in\% c(1,3,5,9)
 1:10 \%out\% c(1,3,5,9)
-letters[1:5] \%wo\% letters[3:7]
-letters[1:5] \%wi\% letters[3:7]
 
-## Note that setdiff() is very similar and typically makes more sense:
-        c(1:6,7:2) \%w/o\% c(3,7,12)  # -> keeps duplicates
-setdiff(c(1:6,7:2),      c(3,7,12)) # -> unique values
+# intersect() and setdiff() are similiar but don't keep duplicates
+x <- c(1:6, 7:2)
+y <- c(3, 7, 12)
+
+x \%wo\% y      # --> keeps duplicated
+setdiff(x, y) # --> unique values
+
+x \%wi\% y        # --> keeps duplicated
+intersect(x, y) # --> unique values
 }
