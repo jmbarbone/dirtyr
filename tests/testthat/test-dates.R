@@ -1,16 +1,21 @@
 context("Dates")
 
+
+test_that("Date utils", {
+  expect_equal(as.Date(NA), NA_date_)
+})
+
 test_that("Examples in documentation are correct", {
   expect_equal(earliest_date(2019, 1, 0), as.Date("2019-01-01"))
   expect_equal(earliest_date(2000), as.Date("2000-01-01"))
-  expect_equal(earliest_date(2019, NULL, NULL), as.Date("2019-01-01"))
-  expect_equal(earliest_date(2019, NULL, 2), as.Date("2019-01-02"))
-  expect_equal(earliest_date(2019, NULL, 31), as.Date("2019-01-31"))
+  expect_equal(earliest_date(2019, NA, NA), as.Date("2019-01-01"))
+  expect_equal(earliest_date(2019, NA, 2), as.Date("2019-01-02"))
+  expect_equal(earliest_date(2019, NA, 31), as.Date("2019-01-31"))
 
   expect_equal(latest_date(2019), as.Date("2019-12-31"))
-  expect_equal(latest_date(2019, NULL, NULL), as.Date("2019-12-31"))
+  expect_equal(latest_date(2019, NA, NA), as.Date("2019-12-31"))
   expect_equal(latest_date(2019, 0), as.Date("2019-12-31"))
-  expect_equal(latest_date(2019, NULL, 2), as.Date("2019-12-02"))
+  expect_equal(latest_date(2019, NA, 2), as.Date("2019-12-02"))
   expect_equal(latest_date(2019, 2), as.Date("2019-02-28"))
   expect_equal(latest_date(2016, 2), as.Date("2016-02-29"))
 

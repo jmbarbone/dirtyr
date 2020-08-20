@@ -7,16 +7,11 @@
 \alias{latest_date}
 \title{Inexact dates}
 \usage{
-unknown_date(
-  x,
-  format = "ymd",
-  possible = c("earliest", "latest"),
-  invalid_date_string = "^UNK?|NA$"
-)
+unknown_date(x, format = "ymd", possible = c("earliest", "latest"), ...)
 
-earliest_date(year, month = NULL, day = NULL)
+earliest_date(year, month = NA, day = NA)
 
-latest_date(year, month = NULL, day = NULL)
+latest_date(year, month = NA, day = NA)
 }
 \arguments{
 \item{x}{a date "string" (see details)}
@@ -25,14 +20,14 @@ latest_date(year, month = NULL, day = NULL)
 
 \item{possible}{Whether to look at earliest or latest}
 
-\item{invalid_date_string}{A string (passed as a regular expression; case insensitive)
-to be removed from `x`}
+\item{...}{Additional arguments passed to `extract_date()`}
 
 \item{year}{Year}
 
 \item{month}{Month}
 
-\item{day}{Day}
+\item{day}{Day
+to be removed from `x`}
 }
 \description{
 Incomplete dates cannot be directly coerced into date values in R.
@@ -51,14 +46,14 @@ For cases in which the year is not provided or the month is unknown, it is
 \examples{
 earliest_date(2019, 1, 0)
 earliest_date(2000)
-earliest_date(2019, NULL, NULL)
-earliest_date(2019, NULL, 2)
-earliest_date(2019, NULL, 31)
+earliest_date(2019, NA, NA)
+earliest_date(2019, NA, 2)
+earliest_date(2019, NA, 31)
 
 latest_date(2019)
-latest_date(2019, NULL, NULL)
+latest_date(2019, NA, NA)
 latest_date(2019, 0)
-latest_date(2019, NULL, 2)
+latest_date(2019, NA, 2)
 latest_date(2019, 2)
 latest_date(2016, 2)
 

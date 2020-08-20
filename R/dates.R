@@ -13,13 +13,13 @@
 #' For cases in which the year is not provided or the month is unknown, it is
 #'   suggested that these be recoded before using this function.
 #'
-#' @param year Year
-#' @param month Month
-#' @param day Day
 #' @param x a date "string" (see details)
 #' @param format A date "format" (see details)
 #' @param possible Whether to look at earliest or latest
-#' @param invalid_date_string A string (passed as a regular expression; case insensitive)
+#' @param ... Additional arguments passed to `extract_date()`
+#' @param year Year
+#' @param month Month
+#' @param day Day
 #'   to be removed from `x`
 #'
 #' @importFrom stats setNames
@@ -29,14 +29,14 @@
 #' @examples
 #' earliest_date(2019, 1, 0)
 #' earliest_date(2000)
-#' earliest_date(2019, NULL, NULL)
-#' earliest_date(2019, NULL, 2)
-#' earliest_date(2019, NULL, 31)
+#' earliest_date(2019, NA, NA)
+#' earliest_date(2019, NA, 2)
+#' earliest_date(2019, NA, 31)
 #'
 #' latest_date(2019)
-#' latest_date(2019, NULL, NULL)
+#' latest_date(2019, NA, NA)
 #' latest_date(2019, 0)
-#' latest_date(2019, NULL, 2)
+#' latest_date(2019, NA, 2)
 #' latest_date(2019, 2)
 #' latest_date(2016, 2)
 #'
@@ -53,104 +53,141 @@
 
 #' @export
 #' @rdname possible_date
-unknown_date <- function(x, format = "ymd", possible = c("earliest", "latest"), invalid_date_string = "^UNK?|NA$") {
+unknown_date <- function(x, format = "ymd", possible = c("earliest", "latest"), ...) {
   possible <- match.arg(possible)
 
   form <- strsplit(format, "")[[1]]
+
   if (anyNA(match(form, c("y", "m", "d")))) {
     stop("Format not assigned correctly: should use 'y', 'm', and 'd'.",
          call. = FALSE)
   }
 
-  res <- lapply(x,
-                extract_date,
-                form = form,
-                possible = possible,
-                invalid_date_string = invalid_date_string)
-  do.call(c, res)
+  extract_date(x,
+               form = form,
+               possible = possible,
+               ...)
 }
 
+extract_date <- function(x, form = NULL, possible, invalid_date_string = "^UNK?|NA$", format) {
 
-extract_date <- function(x, form = NULL, possible, invalid_date_string = invalid_date_string, format) {
-  if (is.na(x) | gsub("[[:space:]]+|[[:punct:]]+", "", x) == "") {
-    return(NA_date_)
-  }
+  # x <- c("2019-01-01", "2019-02-28", "3 UNK 2019", "UN JUN 2004", NA, "Feb 2000")
+  # format <- "ymd"
+  # possible <- "earliest"
+  # invalid_date_string <- "^UNK?|NA$"
+  # form <- strsplit(format, "")[[1]]
 
-  if (is.null(form) & !missing(format)) {
+  if (is.null(form) && !missing(format)) {
     form <- strsplit(format, "")[[1]]
   }
 
-  x <- strsplit(x, "[^[:alnum:]]")[[1]]
-  form <- c("y" = 1, "m" = 2, "d" = 3)[form]
-  x[grepl(invalid_date_string, x, ignore.case = TRUE)] <- NA_character_
-  x[x == "0"] <- NA_character_
-  v <- switch(length(x),
-              `1` = insert(c(NA_character_,NA_character_, NA_character_),
-                           x, which(names(form) == "y"))[form],
-              `2` = insert(x, NA_character_, which(names(form) == "d"))[form],
-              `3` = x[form])
+  if (length(form) == 1L) form <- strsplit(form, "")[[1]]
 
-  if (!maybe_numeric(v[2])) {
-    v[2] <- which_month(v[2])
+
+  # Split each string
+  splits <- strsplit(x, "[^[:alnum:]]")
+  form_order <- c("y" = 1, "m" = 2, "d" = 3)[form]
+
+  names(splits) <- x
+
+  # creates list
+  mat <- vapply(splits, function(xx) {
+    xx[grepl(invalid_date_string, xx, ignore.case = TRUE)] <- NA_character_
+    xx[gsub("[[:space:]]+|[[:punct:]]+", "", xx) == ""] <- NA_character_
+
+    al <- grep("[[:alpha:]]", xx)
+    if (length(al)) {
+      xx[al] <- which_month(xx[al])
+    }
+    # Make proper inserts
+    foo <- form_switch_selector(xx)
+    foo(xx, form_order)
+  }, character(3), USE.NAMES = TRUE)
+
+  class(mat) <- "integer"
+
+  res <- switch(
+    possible,
+    earliest = apply(mat, 2, function(x) earliest_date_chr(x[1], x[2], x[3])),
+    latest = apply(mat, 2, function(x) latest_date_chr(x[1], x[2], x[3]))
+  )
+
+  as_date_strptime(res)
+}
+
+form_switch_selector <- function(x) {
+  ln <- length(x)
+
+  if (ln == 0L) {
+    # Show all NA if no length
+    function(...) rep(NA_character_, 3)
+  } else if (ln < 3L) {
+    # For 1 or 2 decide on inserts
+    switch(
+      ln,
+      `1` = function(x, form) {
+        # stopifnot(!is.null(names(form)))
+        insert(c(NA_character_, NA_character_, NA_character_),
+               x,
+               which(names(form) == "y"))[form]
+      },
+      `2` = function(x, form){
+        # stopifnot(!is.null(names(form)))
+        insert(x, NA_character_, which(names(form) == "d"))[form]
+      }
+    )
+  } else {
+    # Default values
+    # Numeric EXPR does not allow a default value in switch()
+    function(x, form) x[form]
   }
-
-  switch(possible,
-         earliest = earliest_date(year = v[1], month = v[2], day = v[3]),
-         latest = latest_date(year = v[1], month = v[2], day = v[3]))
 }
 
 #' @export
 #' @rdname possible_date
-earliest_date <- function(year, month = NULL, day = NULL) {
+earliest_date <- function(year, month = NA, day = NA) {
+  as_date_strptime(earliest_date_chr(year, month, day))
+}
+
+earliest_date_chr <- function(year, month = NA, day = NA) {
   if (is.na(year)) {
-    return(NA_date_)
+    return(NA_character_)
   }
 
-  x <- vapply(list(month, day),
-              function(xx) {
-                if (is.null(xx)) {
-                  xx <- "01"
-                } else if (is.na(xx) | xx <= 0) {
-                  xx <- "01"
-                } else {
-                  formatC(xx, width = 2, flag = 0)
-                }
-              },
-              character(1),
-              USE.NAMES = FALSE)
-
-  as_date_strptime(paste(c(year, x), collapse = "-"))
+  vec <- c(year, month, day)
+  out <- as.character(vec)
+  out[2][vec[2] > 12] <- "12L"
+  max_days <- get_days_in_month(vec[1])[vec[2]]
+  out[3][vec[3] > max_days] <- as.character(max_days)
+  out[2:3][is.na(vec[2:3]) | vec[2:3] <= 0] <- "01"
+  paste(out, collapse = "-")
 }
+
 
 #' @export
 #' @rdname possible_date
-latest_date <- function(year, month = NULL, day = NULL) {
+latest_date <- function(year, month = NA, day = NA) {
+  as_date_strptime(latest_date_chr(year, month, day))
+}
+
+latest_date_chr <- function(year, month = NA, day = NA) {
   if (is.na(year)) {
-    return(NA_date_)
-  }
-  year <- as.numeric(year)
-
-  if (is.null(month)) {
-    month <- 12
-  } else if (is.na(month)) {
-    month <- 12
+    return(NA_character_)
   }
 
-  month <- suppressWarnings(as.numeric(month))
+  year <- as.integer(year)
 
-  if (is.na(month) | month <= 0 | month > 12) {
-    month <- 12
+  if (is.na(month) |  month >= 12L | month == 0L) {
+    month <- 12L
+  } else if (month < 0L) {
+    month <- 1L
   }
 
-  cmonth <- formatC(month, width = 2, flag = "0")
-
-  if (is.null(day)) {
-    day <- get_days_in_month(year)[month]
-  } else if (is.na(day) | day <= 0) {
-    day <- get_days_in_month(year)[month]
+  if (is.na(day) | day <= 0) {
+    day <- get_days_in_month(year)[[month]]
   }
 
-  as_date_strptime(paste(year, cmonth, day, sep = "-"))
+  paste(year, month, day, sep = "-")
 }
 
 #' Splits/parses dates
@@ -222,7 +259,7 @@ parse_date <- function(x, cols, year = "year", month = "month", day = "day",
 # Utils -------------------------------------------------------------------
 
 days_in_month <- setNames(
-  c(31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31),
+  as.integer(c(31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31)),
   month.abb)
 
 is_leap <- function(year = NULL) {
@@ -239,7 +276,7 @@ is_leap <- function(year = NULL) {
 
 get_days_in_month <- function(year = NULL) {
   if (is_leap(year)) {
-    days_in_month['Feb'] <- 29
+    days_in_month['Feb'] <- 29L
   }
   days_in_month
 }
@@ -250,7 +287,7 @@ which_month <- function(month_abbreviation) {
   x <- which(month_abb == tolower(month_abbreviation))
 
   if (length(x) == 0) {
-    return(NA)
+    return(NA_integer_)
   }
 
   x
