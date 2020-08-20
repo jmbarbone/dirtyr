@@ -84,6 +84,7 @@ unknown_date <- function(x, format = "ymd", possible = c("earliest", "latest"), 
   }
 
   out
+
 }
 
 form_to_dt_format <- function(x) {
@@ -98,7 +99,6 @@ extract_date <- function(x, form = NULL, possible, invalid_date_string = "^UNK?|
   }
 
   if (length(form) == 1L) form <- strsplit(form, "")[[1]]
-
 
   # Split each string
   splits <- strsplit(x, "[^[:alnum:]]")
@@ -177,11 +177,13 @@ earliest_date_chr <- function(year, month = NA, day = NA) {
   out[3][vec[3] > max_days] <- as.character(max_days)
   out[2:3][is.na(vec[2:3]) | vec[2:3] <= 0] <- "01"
   paste(out, collapse = "-")
+
 }
 
 
 #' @export
 #' @rdname possible_date
+
 latest_date <- function(year, month = NA, day = NA) {
   as_date_strptime(latest_date_chr(year, month, day))
 }
@@ -202,7 +204,7 @@ latest_date_chr <- function(year, month = NA, day = NA) {
   if (is.na(day) | day <= 0) {
     day <- get_days_in_month(year)[[month]]
   }
-
+  
   paste(year, month, day, sep = "-")
 }
 
@@ -233,7 +235,7 @@ latest_date_chr <- function(year, month = NA, day = NA) {
 #' @export
 split_date <- function(x, year = "year", month = "month", day = "day",
                        dates_to_row = FALSE) {
-  stopifnot(class(x) == "Date")
+  stopifnot(inherits(x, "Date"))
   x %>%
     as.character() %>%
     sapply(strsplit, split = "-", fixed = TRUE, simplify = TRUE) %>%
@@ -294,6 +296,7 @@ get_days_in_month <- function(year = NULL) {
   if (is_leap(year)) {
     days_in_month['Feb'] <- 29L
   }
+
   days_in_month
 }
 

@@ -12,6 +12,7 @@ unknown_date(x, format = "ymd", possible = c("earliest", "latest"), ...)
 earliest_date(year, month = NA, day = NA)
 
 latest_date(year, month = NA, day = NA)
+
 }
 \arguments{
 \item{x}{a date "string" (see details)}
@@ -27,6 +28,8 @@ latest_date(year, month = NA, day = NA)
 \item{month}{Month}
 
 \item{day}{Day}
+
+\item{as_date}{Logical, if TRUE will return the output as a date}
 }
 \description{
 Incomplete dates cannot be directly coerced into date values in R.
@@ -51,6 +54,9 @@ If a split vector of 1 is passed to `unknown_date`, it is assumed that the
   vector consists only of the Year.
 For cases in which the year is not provided or the month is unknown, it is
   suggested that these be recoded before using this function.
+
+The `as_date` parameter is used to allow the `unknown_date` function to work
+  with a character vector and change the date class at the end
 }
 \examples{
 earliest_date(2019, 1, 0)
