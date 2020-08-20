@@ -7,16 +7,12 @@
 \alias{latest_date}
 \title{Inexact dates}
 \usage{
-unknown_date(
-  x,
-  format = "ymd",
-  possible = c("earliest", "latest"),
-  invalid_date_string = "^UNK?|NA$"
-)
+unknown_date(x, format = "ymd", possible = c("earliest", "latest"), ...)
 
-earliest_date(year, month = NULL, day = NULL, as_date = TRUE)
+earliest_date(year, month = NA, day = NA)
 
-latest_date(year, month = NULL, day = NULL, as_date = TRUE)
+latest_date(year, month = NA, day = NA)
+
 }
 \arguments{
 \item{x}{a date "string" (see details)}
@@ -25,8 +21,7 @@ latest_date(year, month = NULL, day = NULL, as_date = TRUE)
 
 \item{possible}{Whether to look at earliest or latest}
 
-\item{invalid_date_string}{A string (passed as a regular expression; case insensitive)
-to be removed from `x`}
+\item{...}{Additional arguments passed to `extract_date()`}
 
 \item{year}{Year}
 
@@ -38,9 +33,19 @@ to be removed from `x`}
 }
 \description{
 Incomplete dates cannot be directly coerced into date values in R.
-These functions help
 }
 \details{
+These functions help resolve some of those issues by providing the earliest
+  or possible dates from an inexact date.  For example, the value `"2010-10"`
+  cannot be resolved because the day is missing.  These functions will either
+  return `"2010-10-01"` or `"2010-10-31"` depending on the settings.
+  Likewise, if the month is missing (e.g., `"1950-UN-15"`) we can still use
+  the earliest (i.e., `"1950-01-15"`) or the latest (i.e., `"1950-12-15"`).
+
+These could greatly help complete a data set that has many missing or
+  inexact dates that still need to be considered.
+
+
 `unknown_date` is a vectorized function which implements the non-vectorized
   `earliest_date` and `latest_date`.
 If a split vector of 2 is passed to `unknown_date`, it is assumed that the
@@ -56,14 +61,14 @@ The `as_date` parameter is used to allow the `unknown_date` function to work
 \examples{
 earliest_date(2019, 1, 0)
 earliest_date(2000)
-earliest_date(2019, NULL, NULL)
-earliest_date(2019, NULL, 2)
-earliest_date(2019, NULL, 31)
+earliest_date(2019, NA, NA)
+earliest_date(2019, NA, 2)
+earliest_date(2019, NA, 31)
 
 latest_date(2019)
-latest_date(2019, NULL, NULL)
+latest_date(2019, NA, NA)
 latest_date(2019, 0)
-latest_date(2019, NULL, 2)
+latest_date(2019, NA, 2)
 latest_date(2019, 2)
 latest_date(2016, 2)
 
@@ -77,4 +82,5 @@ unknown_date(c("01 JAN 1996", "Feb 2010", "2019"), "dmy")
 unknown_date(c("01 JAN 1996", "Feb 2016"), "dmy", "latest")
 unknown_date("2015", possible = "e")
 unknown_date("2015", possible = "l")
+
 }

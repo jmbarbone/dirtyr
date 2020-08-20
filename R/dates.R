@@ -1,7 +1,16 @@
 #' Inexact dates
 #'
 #' Incomplete dates cannot be directly coerced into date values in R.
-#' These functions help
+#'
+#' These functions help resolve some of those issues by providing the earliest
+#'   or possible dates from an inexact date.  For example, the value `"2010-10"`
+#'   cannot be resolved because the day is missing.  These functions will either
+#'   return `"2010-10-01"` or `"2010-10-31"` depending on the settings.
+#'   Likewise, if the month is missing (e.g., `"1950-UN-15"`) we can still use
+#'   the earliest (i.e., `"1950-01-15"`) or the latest (i.e., `"1950-12-15"`).
+#'
+#' These could greatly help complete a data set that has many missing or
+#'   inexact dates that still need to be considered.
 #'
 #' @details
 #' `unknown_date` is a vectorized function which implements the non-vectorized
@@ -13,18 +22,13 @@
 #' For cases in which the year is not provided or the month is unknown, it is
 #'   suggested that these be recoded before using this function.
 #'
-#' The `as_date` parameter is used to allow the `unknown_date` function to work
-#'   with a character vector and change the date class at the end
-#'
-#' @param year Year
-#' @param month Month
-#' @param day Day
 #' @param x a date "string" (see details)
 #' @param format A date "format" (see details)
 #' @param possible Whether to look at earliest or latest
-#' @param invalid_date_string A string (passed as a regular expression; case insensitive)
-#'   to be removed from `x`
-#' @param as_date Logical, if TRUE will return the output as a date
+#' @param ... Additional arguments passed to `extract_date()`
+#' @param year Year
+#' @param month Month
+#' @param day Day
 #'
 #' @importFrom stats setNames
 #'
@@ -33,14 +37,14 @@
 #' @examples
 #' earliest_date(2019, 1, 0)
 #' earliest_date(2000)
-#' earliest_date(2019, NULL, NULL)
-#' earliest_date(2019, NULL, 2)
-#' earliest_date(2019, NULL, 31)
+#' earliest_date(2019, NA, NA)
+#' earliest_date(2019, NA, 2)
+#' earliest_date(2019, NA, 31)
 #'
 #' latest_date(2019)
-#' latest_date(2019, NULL, NULL)
+#' latest_date(2019, NA, NA)
 #' latest_date(2019, 0)
-#' latest_date(2019, NULL, 2)
+#' latest_date(2019, NA, 2)
 #' latest_date(2019, 2)
 #' latest_date(2016, 2)
 #'
@@ -54,140 +58,154 @@
 #' unknown_date(c("01 JAN 1996", "Feb 2016"), "dmy", "latest")
 #' unknown_date("2015", possible = "e")
 #' unknown_date("2015", possible = "l")
-
-unknown_date <- function(x,
-                         format = "ymd",
-                         possible = c("earliest", "latest"),
-                         invalid_date_string = "^UNK?|NA$") {
+#'
+#' @export
+#' @rdname possible_date
+unknown_date <- function(x, format = "ymd", possible = c("earliest", "latest"), ...) {
   possible <- match.arg(possible)
 
+  ## Attempt to check for available dates
+  ## Remove anything that isn't a number or a character for simplicity
+
   form <- strsplit(format, "")[[1]]
+
   if (anyNA(match(form, c("y", "m", "d")))) {
     stop("Format not assigned correctly: should use 'y', 'm', and 'd'.",
          call. = FALSE)
   }
 
-  res <- vapply(x,
-                extract_date,
-                character(1),
-                form = form,
-                possible = possible,
-                invalid_date_string = invalid_date_string,
-                as_date = FALSE,
-                USE.NAMES = FALSE)
+  fform <- form_to_dt_format(form)
+  out <- as_date_strptime(gsub("[^[:alnum:]]", "", x), format = fform)
+  bad <- which(is.na(out) & !is.na(x))
+
+  if (length(bad)) {
+    res <- extract_date(x[bad], form = form, possible = possible, ...)
+    out[bad] <- as_date_strptime(res)
+  }
+
+  out
+
+}
+
+form_to_dt_format <- function(x) {
+  out <- sub("y", "Y", x)
+  paste(paste0("%", out), collapse = "")
+
+}
+
+extract_date <- function(x, form = NULL, possible, invalid_date_string = "^UNK?|NA$", format) {
+  if (is.null(form) && !missing(format)) {
+    form <- strsplit(format, "")[[1]]
+  }
+
+  if (length(form) == 1L) form <- strsplit(form, "")[[1]]
+
+  # Split each string
+  splits <- strsplit(x, "[^[:alnum:]]")
+  form_order <- c("y" = 1, "m" = 2, "d" = 3)[form]
+
+  names(splits) <- x
+
+  # creates list
+  mat <- vapply(splits, function(xx) {
+    xx[grepl(invalid_date_string, xx, ignore.case = TRUE)] <- NA_character_
+    xx[gsub("[[:space:]]+|[[:punct:]]+", "", xx) == ""] <- NA_character_
+
+    al <- grep("[[:alpha:]]", xx)
+    if (length(al)) {
+      xx[al] <- which_month(xx[al])
+    }
+    # Make proper inserts
+    foo <- form_switch_selector(xx)
+    foo(xx, form_order)
+  }, character(3), USE.NAMES = TRUE)
+
+  class(mat) <- "integer"
+
+  res <- switch(
+    possible,
+    earliest = apply(mat, 2, function(x) earliest_date_chr(x[1], x[2], x[3])),
+    latest = apply(mat, 2, function(x) latest_date_chr(x[1], x[2], x[3]))
+  )
 
   as_date_strptime(res)
 }
 
+form_switch_selector <- function(x) {
+  ln <- length(x)
 
-extract_date <- function(x,
-                         form = NULL,
-                         possible,
-                         invalid_date_string = invalid_date_string,
-                         format,
-                         as_date = TRUE) {
-  if (is.na(x) | gsub("[[:space:]]+|[[:punct:]]+", "", x) == "") {
-    if (as_date) {
-      return(NA_date_)
-    } else {
-      return(NA_character_)
-    }
-  }
-
-  if (is.null(form) & !missing(format)) {
-    form <- strsplit(format, "")[[1]]
-  }
-
-  x <- strsplit(x, "[^[:alnum:]]")[[1]]
-  form <- c("y" = 1, "m" = 2, "d" = 3)[form]
-  x[grepl(invalid_date_string, x, ignore.case = TRUE)] <- NA_character_
-  x[x == "0"] <- NA_character_
-  v <- switch(length(x),
-              `1` = insert(c(NA_character_,NA_character_, NA_character_),
-                           x, which(names(form) == "y"))[form],
-              `2` = insert(x, NA_character_, which(names(form) == "d"))[form],
-              `3` = x[form])
-
-  if (!maybe_numeric(v[2])) {
-    v[2] <- which_month(v[2])
-  }
-
-  switch(possible,
-         earliest = earliest_date(year = v[1], month = v[2], day = v[3], as_date = as_date),
-         latest = latest_date(year = v[1], month = v[2], day = v[3], as_date = as_date))
-}
-
-#' @export
-#' @rdname possible_date
-earliest_date <- function(year, month = NULL, day = NULL, as_date = TRUE) {
-  if (is.na(year) | year < 0) {
-    # TODO Add feature to allow for earliest dates?
-    if (as_date) {
-      return(NA_date_)
-    } else {
-      return(NA_character_)
-    }
-  }
-
-  x <- vapply(list(month, day),
-              function(xx) {
-                if (is.null(xx)) {
-                  xx <- "01"
-                } else if (is.na(xx) | xx <= 0) {
-                  xx <- "01"
-                } else {
-                  formatC(xx, width = 2, flag = 0)
-                }
-              },
-              character(1),
-              USE.NAMES = FALSE)
-
-  res <- paste(c(year, x), collapse = "-")
-
-  if (as_date) {
-    as_date_strptime(res)
+  if (ln == 0L) {
+    # Show all NA if no length
+    function(...) rep(NA_character_, 3)
+  } else if (ln < 3L) {
+    # For 1 or 2 decide on inserts
+    switch(
+      ln,
+      `1` = function(x, form) {
+        # stopifnot(!is.null(names(form)))
+        insert(c(NA_character_, NA_character_, NA_character_),
+               x,
+               which(names(form) == "y"))[form]
+      },
+      `2` = function(x, form){
+        # stopifnot(!is.null(names(form)))
+        insert(x, NA_character_, which(names(form) == "d"))[form]
+      }
+    )
   } else {
-    res
+    # Default values
+    # Numeric EXPR does not allow a default value in switch()
+    function(x, form) x[form]
   }
 }
 
 #' @export
 #' @rdname possible_date
-latest_date <- function(year, month = NULL, day = NULL, as_date = TRUE) {
+earliest_date <- function(year, month = NA, day = NA) {
+  as_date_strptime(earliest_date_chr(year, month, day))
+}
+
+earliest_date_chr <- function(year, month = NA, day = NA) {
   if (is.na(year)) {
-    # TODO Possible feature to allow for max dates?
-    # Auto set to current date?  Or just return as NA?
-    return(NA_date_)
-  }
-  year <- as.numeric(year)
-
-  if (is.null(month)) {
-    month <- 12
-  } else if (is.na(month)) {
-    month <- 12
+    return(NA_character_)
   }
 
-  month <- suppressWarnings(as.numeric(month))
+  vec <- c(year, month, day)
+  out <- as.character(vec)
+  out[2][vec[2] > 12] <- "12L"
+  max_days <- get_days_in_month(vec[1])[vec[2]]
+  out[3][vec[3] > max_days] <- as.character(max_days)
+  out[2:3][is.na(vec[2:3]) | vec[2:3] <= 0] <- "01"
+  paste(out, collapse = "-")
 
-  if (is.na(month) | month <= 0 | month > 12) {
-    month <- 12
+}
+
+
+#' @export
+#' @rdname possible_date
+
+latest_date <- function(year, month = NA, day = NA) {
+  as_date_strptime(latest_date_chr(year, month, day))
+}
+
+latest_date_chr <- function(year, month = NA, day = NA) {
+  if (is.na(year)) {
+    return(NA_character_)
   }
 
-  cmonth <- formatC(month, width = 2, flag = "0")
+  year <- as.integer(year)
 
-  if (is.null(day)) {
-    day <- get_days_in_month(year)[month]
-  } else if (is.na(day) | day <= 0) {
-    day <- get_days_in_month(year)[month]
+  if (is.na(month) |  month >= 12L | month == 0L) {
+    month <- 12L
+  } else if (month < 0L) {
+    month <- 1L
   }
 
-  res <- paste(year, cmonth, day, sep = "-")
-
-  if (as_date) {
-    as_date_strptime(res)
-  } else {
-    res
+  if (is.na(day) | day <= 0) {
+    day <- get_days_in_month(year)[[month]]
   }
+  
+  paste(year, month, day, sep = "-")
 }
 
 #' Splits/parses dates
@@ -259,7 +277,7 @@ parse_date <- function(x, cols, year = "year", month = "month", day = "day",
 # Utils -------------------------------------------------------------------
 
 days_in_month <- setNames(
-  c(31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31),
+  as.integer(c(31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31)),
   month.abb)
 
 is_leap <- function(year = NULL) {
@@ -276,7 +294,7 @@ is_leap <- function(year = NULL) {
 
 get_days_in_month <- function(year = NULL) {
   if (is_leap(year)) {
-    days_in_month['Feb'] <- 29
+    days_in_month['Feb'] <- 29L
   }
 
   days_in_month
@@ -299,9 +317,9 @@ NA_date_ <- as.Date(NA)
 # To be set on package load
 options(dirtyr.tz = Sys.timezone())
 
-as_date_strptime <- function(x) {
+as_date_strptime <- function(x, format = "%Y-%m-%d") {
   as.Date(strptime(x,
-                   format = "%Y-%m-%d",
+                   format = format,
                    tz = getOption("dirtyr.tz", "GMT")),
-          format = "%Y-%m-%d")
+          format = format)
 }
