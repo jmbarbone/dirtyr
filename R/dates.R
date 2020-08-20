@@ -13,6 +13,9 @@
 #' For cases in which the year is not provided or the month is unknown, it is
 #'   suggested that these be recoded before using this function.
 #'
+#' The `as_date` parameter is used to allow the `unknown_date` function to work
+#'   with a character vector and change the date class at the end
+#'
 #' @param year Year
 #' @param month Month
 #' @param day Day
@@ -21,6 +24,7 @@
 #' @param possible Whether to look at earliest or latest
 #' @param invalid_date_string A string (passed as a regular expression; case insensitive)
 #'   to be removed from `x`
+#' @param as_date Logical, if TRUE will return the output as a date
 #'
 #' @importFrom stats setNames
 #'
@@ -51,9 +55,10 @@
 #' unknown_date("2015", possible = "e")
 #' unknown_date("2015", possible = "l")
 
-#' @export
-#' @rdname possible_date
-unknown_date <- function(x, format = "ymd", possible = c("earliest", "latest"), invalid_date_string = "^UNK?|NA$") {
+unknown_date <- function(x,
+                         format = "ymd",
+                         possible = c("earliest", "latest"),
+                         invalid_date_string = "^UNK?|NA$") {
   possible <- match.arg(possible)
 
   form <- strsplit(format, "")[[1]]
@@ -62,18 +67,31 @@ unknown_date <- function(x, format = "ymd", possible = c("earliest", "latest"), 
          call. = FALSE)
   }
 
-  res <- lapply(x,
+  res <- vapply(x,
                 extract_date,
+                character(1),
                 form = form,
                 possible = possible,
-                invalid_date_string = invalid_date_string)
-  do.call(c, res)
+                invalid_date_string = invalid_date_string,
+                as_date = FALSE,
+                USE.NAMES = FALSE)
+
+  as_date_strptime(res)
 }
 
 
-extract_date <- function(x, form = NULL, possible, invalid_date_string = invalid_date_string, format) {
+extract_date <- function(x,
+                         form = NULL,
+                         possible,
+                         invalid_date_string = invalid_date_string,
+                         format,
+                         as_date = TRUE) {
   if (is.na(x) | gsub("[[:space:]]+|[[:punct:]]+", "", x) == "") {
-    return(NA_date_)
+    if (as_date) {
+      return(NA_date_)
+    } else {
+      return(NA_character_)
+    }
   }
 
   if (is.null(form) & !missing(format)) {
@@ -95,15 +113,20 @@ extract_date <- function(x, form = NULL, possible, invalid_date_string = invalid
   }
 
   switch(possible,
-         earliest = earliest_date(year = v[1], month = v[2], day = v[3]),
-         latest = latest_date(year = v[1], month = v[2], day = v[3]))
+         earliest = earliest_date(year = v[1], month = v[2], day = v[3], as_date = as_date),
+         latest = latest_date(year = v[1], month = v[2], day = v[3], as_date = as_date))
 }
 
 #' @export
 #' @rdname possible_date
-earliest_date <- function(year, month = NULL, day = NULL) {
-  if (is.na(year)) {
-    return(NA_date_)
+earliest_date <- function(year, month = NULL, day = NULL, as_date = TRUE) {
+  if (is.na(year) | year < 0) {
+    # TODO Add feature to allow for earliest dates?
+    if (as_date) {
+      return(NA_date_)
+    } else {
+      return(NA_character_)
+    }
   }
 
   x <- vapply(list(month, day),
@@ -119,13 +142,21 @@ earliest_date <- function(year, month = NULL, day = NULL) {
               character(1),
               USE.NAMES = FALSE)
 
-  as_date_strptime(paste(c(year, x), collapse = "-"))
+  res <- paste(c(year, x), collapse = "-")
+
+  if (as_date) {
+    as_date_strptime(res)
+  } else {
+    res
+  }
 }
 
 #' @export
 #' @rdname possible_date
-latest_date <- function(year, month = NULL, day = NULL) {
+latest_date <- function(year, month = NULL, day = NULL, as_date = TRUE) {
   if (is.na(year)) {
+    # TODO Possible feature to allow for max dates?
+    # Auto set to current date?  Or just return as NA?
     return(NA_date_)
   }
   year <- as.numeric(year)
@@ -150,7 +181,13 @@ latest_date <- function(year, month = NULL, day = NULL) {
     day <- get_days_in_month(year)[month]
   }
 
-  as_date_strptime(paste(year, cmonth, day, sep = "-"))
+  res <- paste(year, cmonth, day, sep = "-")
+
+  if (as_date) {
+    as_date_strptime(res)
+  } else {
+    res
+  }
 }
 
 #' Splits/parses dates
@@ -180,7 +217,7 @@ latest_date <- function(year, month = NULL, day = NULL) {
 #' @export
 split_date <- function(x, year = "year", month = "month", day = "day",
                        dates_to_row = FALSE) {
-  stopifnot(class(x) == "Date")
+  stopifnot(inherits(x, "Date"))
   x %>%
     as.character() %>%
     sapply(strsplit, split = "-", fixed = TRUE, simplify = TRUE) %>%
@@ -241,6 +278,7 @@ get_days_in_month <- function(year = NULL) {
   if (is_leap(year)) {
     days_in_month['Feb'] <- 29
   }
+
   days_in_month
 }
 
@@ -250,7 +288,7 @@ which_month <- function(month_abbreviation) {
   x <- which(month_abb == tolower(month_abbreviation))
 
   if (length(x) == 0) {
-    return(NA)
+    return(NA_integer_)
   }
 
   x
@@ -264,6 +302,6 @@ options(dirtyr.tz = Sys.timezone())
 as_date_strptime <- function(x) {
   as.Date(strptime(x,
                    format = "%Y-%m-%d",
-                   tz = getOption("dirtyr.tz")),
+                   tz = getOption("dirtyr.tz", "GMT")),
           format = "%Y-%m-%d")
 }
