@@ -3,6 +3,24 @@ context("Dates")
 
 test_that("Date utils", {
   expect_equal(as.Date(NA), NA_date_)
+
+  expect_false(is_leap(1500))
+  expect_true(is_leap(1600))
+  expect_false(is_leap(1700))
+  expect_false(is_leap(1800))
+  expect_false(is_leap(1900))
+  expect_true(is_leap(2000))
+  expect_true(is_leap(2400))
+  expect_true(is_leap(4000))
+  expect_true(is_leap(0))
+  expect_false(is_leap(100))
+  expect_true(is_leap(400))
+
+  expect_named(days_in_month)
+  expect_named(get_days_in_month(0))
+  expect_equal(get_days_in_month(2000)[[2]], 29L)
+  expect_equal(get_days_in_month(1900)[[2]], 28L)
+  expect_equal(get_days_in_month(2100), days_in_month)
 })
 
 test_that("Examples in documentation are correct", {
@@ -43,9 +61,9 @@ test_that("Bad date: Earliest", {
 })
 
 test_that("Bad date: Latest", {
-  dates <- c("3 UNK 2019", "UN JUN 2004", "Feb 2000", "Feb 2100")
+  dates <- c("3 UNK 2019", "UN JUN 2004", "Feb 2000", "Feb 2100", "UK UNK UNKN")
   res <- unknown_date(dates, format = "dmy", possible = "latest")
-  expected <- as.Date(c("2019-12-03", "2004-06-30", "2000-02-29", "2100-02-28"))
+  expected <- as.Date(c("2019-12-03", "2004-06-30", "2000-02-29", "2100-02-28", NA_character_))
   expect_equal(res, expected)
 })
 

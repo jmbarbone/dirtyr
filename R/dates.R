@@ -1,7 +1,16 @@
 #' Inexact dates
 #'
 #' Incomplete dates cannot be directly coerced into date values in R.
-#' These functions help
+#'
+#' These functions help resolve some of those issues by providing the earliest
+#'   or possible dates from an inexact date.  For example, the value `"2010-10"`
+#'   cannot be resolved because the day is missing.  These functions will either
+#'   return `"2010-10-01"` or `"2010-10-31"` depending on the settings.
+#'   Likewise, if the month is missing (e.g., `"1950-UN-15"`) we can still use
+#'   the earliest (i.e., `"1950-01-15"`) or the latest (i.e., `"1950-12-15"`).
+#'
+#' These could greatly help complete a data set that has many missing or
+#'   inexact dates that still need to be considered.
 #'
 #' @details
 #' `unknown_date` is a vectorized function which implements the non-vectorized
@@ -20,7 +29,6 @@
 #' @param year Year
 #' @param month Month
 #' @param day Day
-#'   to be removed from `x`
 #'
 #' @importFrom stats setNames
 #'
@@ -50,11 +58,14 @@
 #' unknown_date(c("01 JAN 1996", "Feb 2016"), "dmy", "latest")
 #' unknown_date("2015", possible = "e")
 #' unknown_date("2015", possible = "l")
-
+#'
 #' @export
 #' @rdname possible_date
 unknown_date <- function(x, format = "ymd", possible = c("earliest", "latest"), ...) {
   possible <- match.arg(possible)
+
+  ## Attempt to check for available dates
+  ## Remove anything that isn't a number or a character for simplicity
 
   form <- strsplit(format, "")[[1]]
 
@@ -63,20 +74,25 @@ unknown_date <- function(x, format = "ymd", possible = c("earliest", "latest"), 
          call. = FALSE)
   }
 
-  extract_date(x,
-               form = form,
-               possible = possible,
-               ...)
+  fform <- form_to_dt_format(form)
+  out <- as_date_strptime(gsub("[^[:alnum:]]", "", x), format = fform)
+  bad <- which(is.na(out) & !is.na(x))
+
+  if (length(bad)) {
+    res <- extract_date(x[bad], form = form, possible = possible, ...)
+    out[bad] <- as_date_strptime(res)
+  }
+
+  out
+}
+
+form_to_dt_format <- function(x) {
+  out <- sub("y", "Y", x)
+  paste(paste0("%", out), collapse = "")
+
 }
 
 extract_date <- function(x, form = NULL, possible, invalid_date_string = "^UNK?|NA$", format) {
-
-  # x <- c("2019-01-01", "2019-02-28", "3 UNK 2019", "UN JUN 2004", NA, "Feb 2000")
-  # format <- "ymd"
-  # possible <- "earliest"
-  # invalid_date_string <- "^UNK?|NA$"
-  # form <- strsplit(format, "")[[1]]
-
   if (is.null(form) && !missing(format)) {
     form <- strsplit(format, "")[[1]]
   }
@@ -298,9 +314,9 @@ NA_date_ <- as.Date(NA)
 # To be set on package load
 options(dirtyr.tz = Sys.timezone())
 
-as_date_strptime <- function(x) {
+as_date_strptime <- function(x, format = "%Y-%m-%d") {
   as.Date(strptime(x,
-                   format = "%Y-%m-%d",
-                   tz = getOption("dirtyr.tz")),
-          format = "%Y-%m-%d")
+                   format = format,
+                   tz = getOption("dirtyr.tz", "GMT")),
+          format = format)
 }

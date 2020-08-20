@@ -26,14 +26,23 @@ latest_date(year, month = NA, day = NA)
 
 \item{month}{Month}
 
-\item{day}{Day
-to be removed from `x`}
+\item{day}{Day}
 }
 \description{
 Incomplete dates cannot be directly coerced into date values in R.
-These functions help
 }
 \details{
+These functions help resolve some of those issues by providing the earliest
+  or possible dates from an inexact date.  For example, the value `"2010-10"`
+  cannot be resolved because the day is missing.  These functions will either
+  return `"2010-10-01"` or `"2010-10-31"` depending on the settings.
+  Likewise, if the month is missing (e.g., `"1950-UN-15"`) we can still use
+  the earliest (i.e., `"1950-01-15"`) or the latest (i.e., `"1950-12-15"`).
+
+These could greatly help complete a data set that has many missing or
+  inexact dates that still need to be considered.
+
+
 `unknown_date` is a vectorized function which implements the non-vectorized
   `earliest_date` and `latest_date`.
 If a split vector of 2 is passed to `unknown_date`, it is assumed that the
@@ -67,4 +76,5 @@ unknown_date(c("01 JAN 1996", "Feb 2010", "2019"), "dmy")
 unknown_date(c("01 JAN 1996", "Feb 2016"), "dmy", "latest")
 unknown_date("2015", possible = "e")
 unknown_date("2015", possible = "l")
+
 }
