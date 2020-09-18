@@ -2,14 +2,19 @@
 % Please edit documentation in R/reverse.R
 \name{reverse}
 \alias{reverse}
+\alias{reverse.data.frame}
 \title{Reverse an object}
 \usage{
 reverse(x, ...)
+
+\method{reverse}{data.frame}(x, row.names = TRUE, ...)
 }
 \arguments{
 \item{x}{A vector, data.frame, or matrix}
 
-\item{...}{Additional arguments sent to methods (not used)}
+\item{...}{Additional arguments sent to methods}
+
+\item{row.names}{If `TRUE` will reverse row.names (default is `TRUE`)}
 }
 \description{
 Reverses the order of an object or a data.frame

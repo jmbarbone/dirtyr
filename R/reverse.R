@@ -3,7 +3,8 @@
 #' Reverses the order of an object or a data.frame
 #'
 #' @param x A vector, data.frame, or matrix
-#' @param ... Additional arguments sent to methods (not used)
+#' @param ... Additional arguments sent to methods
+#' @param row.names If `TRUE` will reverse row.names (default is `TRUE`)
 #' @export
 #'
 #' @examples
@@ -21,11 +22,18 @@ reverse.default <- function(x, ...) {
 }
 
 #' @export
-reverse.data.frame <- function(x, ...) {
- reverse.matrix(x)
+#' @rdname reverse
+reverse.data.frame <- function(x, row.names = TRUE, ...) {
+ out <- reverse.matrix(x)
+
+ if (!row.names) {
+   row.names(out) <- row.names(x)
+ }
+
+ out
 }
 
 #' @export
 reverse.matrix <- function(x, ...) {
-  if(nrow(x)) x[nrow(x):1L, ] else x
+  if (nrow(x)) x[nrow(x):1L, , drop = FALSE] else x
 }
